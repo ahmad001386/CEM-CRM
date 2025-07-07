@@ -28,7 +28,7 @@ export default function SettingsPage() {
   });
 
   const [branding, setBranding] = useState({
-    companyName: 'Your Company',
+    companyName: 'شرکت شما',
     primaryColor: '#00BCD4',
     secondaryColor: '#4CAF50',
     logo: null,
@@ -43,104 +43,111 @@ export default function SettingsPage() {
   };
 
   const handleSaveSettings = () => {
-    console.log('Settings saved:', { theme, notifications, branding });
+    console.log('تنظیمات ذخیره شد:', { theme, notifications, branding });
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fade-in-up">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Settings</h1>
-          <p className="text-muted-foreground">Manage your application preferences and configuration</p>
+          <h1 className="text-3xl font-bold font-vazir bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
+            تنظیمات
+          </h1>
+          <p className="text-muted-foreground font-vazir mt-2">مدیریت تنظیمات و پیکربندی برنامه</p>
         </div>
-        <Button onClick={handleSaveSettings}>
-          Save Changes
+        <Button onClick={handleSaveSettings} className="bg-gradient-to-r from-primary via-secondary to-accent hover:from-primary/90 hover:via-secondary/90 hover:to-accent/90 font-vazir">
+          ذخیره تغییرات
         </Button>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
         {/* General Settings */}
-        <Card>
+        <Card className="border-border/50 hover:border-primary/30 transition-all duration-300">
           <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
+            <CardTitle className="flex items-center space-x-2 space-x-reverse font-vazir">
               <Settings className="h-5 w-5" />
-              <span>General Settings</span>
+              <span>تنظیمات عمومی</span>
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="company-name">Company Name</Label>
+              <Label htmlFor="company-name" className="font-vazir">نام شرکت</Label>
               <Input
                 id="company-name"
                 value={branding.companyName}
                 onChange={(e) => handleBrandingChange('companyName', e.target.value)}
+                className="font-vazir"
+                dir="rtl"
               />
             </div>
             
             <div className="space-y-2">
-              <Label>Theme</Label>
-              <div className="flex items-center space-x-4">
+              <Label className="font-vazir">تم</Label>
+              <div className="flex items-center space-x-4 space-x-reverse">
                 <Button
                   variant={theme === 'light' ? 'default' : 'outline'}
                   size="sm"
                   onClick={() => setTheme('light')}
+                  className="font-vazir"
                 >
-                  Light
+                  روشن
                 </Button>
                 <Button
                   variant={theme === 'dark' ? 'default' : 'outline'}
                   size="sm"
                   onClick={() => setTheme('dark')}
+                  className="font-vazir"
                 >
-                  Dark
+                  تیره
                 </Button>
                 <Button
                   variant={theme === 'system' ? 'default' : 'outline'}
                   size="sm"
                   onClick={() => setTheme('system')}
+                  className="font-vazir"
                 >
-                  System
+                  سیستم
                 </Button>
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label>Time Zone</Label>
-              <select className="w-full px-3 py-2 border rounded-md">
-                <option>UTC (Coordinated Universal Time)</option>
-                <option>EST (Eastern Standard Time)</option>
-                <option>PST (Pacific Standard Time)</option>
-                <option>GMT (Greenwich Mean Time)</option>
+              <Label className="font-vazir">منطقه زمانی</Label>
+              <select className="w-full px-3 py-2 border border-border rounded-md font-vazir" dir="rtl">
+                <option>تهران (ایران)</option>
+                <option>UTC (زمان جهانی)</option>
+                <option>EST (زمان شرق آمریکا)</option>
+                <option>PST (زمان غرب آمریکا)</option>
               </select>
             </div>
           </CardContent>
         </Card>
 
         {/* Branding */}
-        <Card>
+        <Card className="border-border/50 hover:border-secondary/30 transition-all duration-300">
           <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
+            <CardTitle className="flex items-center space-x-2 space-x-reverse font-vazir">
               <Palette className="h-5 w-5" />
-              <span>Branding</span>
+              <span>برندسازی</span>
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label>Company Logo</Label>
-              <div className="flex items-center space-x-4">
+              <Label className="font-vazir">لوگوی شرکت</Label>
+              <div className="flex items-center space-x-4 space-x-reverse">
                 <div className="h-16 w-16 bg-primary/10 rounded-lg flex items-center justify-center">
                   <Upload className="h-6 w-6 text-primary" />
                 </div>
-                <Button variant="outline" size="sm">
-                  <Upload className="h-4 w-4 mr-2" />
-                  Upload Logo
+                <Button variant="outline" size="sm" className="font-vazir">
+                  <Upload className="h-4 w-4 ml-2" />
+                  آپلود لوگو
                 </Button>
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="primary-color">Primary Color</Label>
-              <div className="flex items-center space-x-2">
+              <Label htmlFor="primary-color" className="font-vazir">رنگ اصلی</Label>
+              <div className="flex items-center space-x-2 space-x-reverse">
                 <Input
                   id="primary-color"
                   type="color"
@@ -151,14 +158,15 @@ export default function SettingsPage() {
                 <Input
                   value={branding.primaryColor}
                   onChange={(e) => handleBrandingChange('primaryColor', e.target.value)}
-                  className="flex-1"
+                  className="flex-1 font-vazir"
+                  dir="ltr"
                 />
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="secondary-color">Secondary Color</Label>
-              <div className="flex items-center space-x-2">
+              <Label htmlFor="secondary-color" className="font-vazir">رنگ ثانویه</Label>
+              <div className="flex items-center space-x-2 space-x-reverse">
                 <Input
                   id="secondary-color"
                   type="color"
@@ -169,7 +177,8 @@ export default function SettingsPage() {
                 <Input
                   value={branding.secondaryColor}
                   onChange={(e) => handleBrandingChange('secondaryColor', e.target.value)}
-                  className="flex-1"
+                  className="flex-1 font-vazir"
+                  dir="ltr"
                 />
               </div>
             </div>
@@ -177,19 +186,19 @@ export default function SettingsPage() {
         </Card>
 
         {/* Notifications */}
-        <Card>
+        <Card className="border-border/50 hover:border-accent/30 transition-all duration-300">
           <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
+            <CardTitle className="flex items-center space-x-2 space-x-reverse font-vazir">
               <Bell className="h-5 w-5" />
-              <span>Notifications</span>
+              <span>اعلان‌ها</span>
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <Label htmlFor="email-notifications">Email Notifications</Label>
-                <p className="text-sm text-muted-foreground">
-                  Receive notifications via email
+                <Label htmlFor="email-notifications" className="font-vazir">اعلان‌های ایمیل</Label>
+                <p className="text-sm text-muted-foreground font-vazir">
+                  دریافت اعلان‌ها از طریق ایمیل
                 </p>
               </div>
               <Switch
@@ -203,9 +212,9 @@ export default function SettingsPage() {
 
             <div className="flex items-center justify-between">
               <div>
-                <Label htmlFor="push-notifications">Push Notifications</Label>
-                <p className="text-sm text-muted-foreground">
-                  Receive browser push notifications
+                <Label htmlFor="push-notifications" className="font-vazir">اعلان‌های فوری</Label>
+                <p className="text-sm text-muted-foreground font-vazir">
+                  دریافت اعلان‌های فوری مرورگر
                 </p>
               </div>
               <Switch
@@ -219,9 +228,9 @@ export default function SettingsPage() {
 
             <div className="flex items-center justify-between">
               <div>
-                <Label htmlFor="sms-notifications">SMS Notifications</Label>
-                <p className="text-sm text-muted-foreground">
-                  Receive notifications via SMS
+                <Label htmlFor="sms-notifications" className="font-vazir">اعلان‌های پیامکی</Label>
+                <p className="text-sm text-muted-foreground font-vazir">
+                  دریافت اعلان‌ها از طریق پیامک
                 </p>
               </div>
               <Switch
@@ -235,9 +244,9 @@ export default function SettingsPage() {
 
             <div className="flex items-center justify-between">
               <div>
-                <Label htmlFor="marketing-notifications">Marketing Emails</Label>
-                <p className="text-sm text-muted-foreground">
-                  Receive marketing and promotional emails
+                <Label htmlFor="marketing-notifications" className="font-vazir">ایمیل‌های بازاریابی</Label>
+                <p className="text-sm text-muted-foreground font-vazir">
+                  دریافت ایمیل‌های بازاریابی و تبلیغاتی
                 </p>
               </div>
               <Switch
@@ -250,45 +259,45 @@ export default function SettingsPage() {
         </Card>
 
         {/* Security */}
-        <Card>
+        <Card className="border-border/50 hover:border-primary/30 transition-all duration-300">
           <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
+            <CardTitle className="flex items-center space-x-2 space-x-reverse font-vazir">
               <Shield className="h-5 w-5" />
-              <span>Security</span>
+              <span>امنیت</span>
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label>Two-Factor Authentication</Label>
-              <p className="text-sm text-muted-foreground">
-                Add an extra layer of security to your account
+              <Label className="font-vazir">احراز هویت دو مرحله‌ای</Label>
+              <p className="text-sm text-muted-foreground font-vazir">
+                افزودن لایه امنیتی اضافی به حساب شما
               </p>
-              <Button variant="outline" size="sm">
-                Enable 2FA
+              <Button variant="outline" size="sm" className="font-vazir">
+                فعال‌سازی 2FA
               </Button>
             </div>
 
             <Separator />
 
             <div className="space-y-2">
-              <Label>Session Management</Label>
-              <p className="text-sm text-muted-foreground">
-                Manage your active sessions
+              <Label className="font-vazir">مدیریت جلسات</Label>
+              <p className="text-sm text-muted-foreground font-vazir">
+                مدیریت جلسات فعال شما
               </p>
-              <Button variant="outline" size="sm">
-                View Sessions
+              <Button variant="outline" size="sm" className="font-vazir">
+                مشاهده جلسات
               </Button>
             </div>
 
             <Separator />
 
             <div className="space-y-2">
-              <Label>Password</Label>
-              <p className="text-sm text-muted-foreground">
-                Change your account password
+              <Label className="font-vazir">رمز عبور</Label>
+              <p className="text-sm text-muted-foreground font-vazir">
+                تغییر رمز عبور حساب
               </p>
-              <Button variant="outline" size="sm">
-                Change Password
+              <Button variant="outline" size="sm" className="font-vazir">
+                تغییر رمز عبور
               </Button>
             </div>
           </CardContent>
@@ -296,42 +305,42 @@ export default function SettingsPage() {
       </div>
 
       {/* Data Management */}
-      <Card>
+      <Card className="border-border/50 hover:border-secondary/30 transition-all duration-300">
         <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
+          <CardTitle className="flex items-center space-x-2 space-x-reverse font-vazir">
             <Database className="h-5 w-5" />
-            <span>Data Management</span>
+            <span>مدیریت داده‌ها</span>
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 md:grid-cols-3">
             <div className="space-y-2">
-              <Label>Export Data</Label>
-              <p className="text-sm text-muted-foreground">
-                Download your data in various formats
+              <Label className="font-vazir">خروجی داده‌ها</Label>
+              <p className="text-sm text-muted-foreground font-vazir">
+                دانلود داده‌های شما در فرمت‌های مختلف
               </p>
-              <Button variant="outline" size="sm">
-                Export All Data
+              <Button variant="outline" size="sm" className="font-vazir">
+                خروجی همه داده‌ها
               </Button>
             </div>
 
             <div className="space-y-2">
-              <Label>Import Data</Label>
-              <p className="text-sm text-muted-foreground">
-                Import data from CSV or other sources
+              <Label className="font-vazir">وارد کردن داده‌ها</Label>
+              <p className="text-sm text-muted-foreground font-vazir">
+                وارد کردن داده‌ها از CSV یا منابع دیگر
               </p>
-              <Button variant="outline" size="sm">
-                Import Data
+              <Button variant="outline" size="sm" className="font-vazir">
+                وارد کردن داده‌ها
               </Button>
             </div>
 
             <div className="space-y-2">
-              <Label>Data Backup</Label>
-              <p className="text-sm text-muted-foreground">
-                Create and manage data backups
+              <Label className="font-vazir">پشتیبان‌گیری داده‌ها</Label>
+              <p className="text-sm text-muted-foreground font-vazir">
+                ایجاد و مدیریت پشتیبان‌گیری داده‌ها
               </p>
-              <Button variant="outline" size="sm">
-                Create Backup
+              <Button variant="outline" size="sm" className="font-vazir">
+                ایجاد پشتیبان
               </Button>
             </div>
           </div>
