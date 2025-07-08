@@ -1,35 +1,169 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { DataTable } from '@/components/ui/data-table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Progress } from '@/components/ui/progress';
 import { mockCustomers } from '@/lib/mock-data';
 import { Customer } from '@/lib/types';
-import { Plus, Users, Building, User } from 'lucide-react';
+import { 
+  Plus, 
+  Users, 
+  Building, 
+  User, 
+  Search, 
+  Filter,
+  TrendingUp,
+  Phone,
+  Mail,
+  Calendar,
+  AlertTriangle,
+  CheckCircle,
+  Clock,
+  Target,
+  Eye,
+  Edit,
+  Trash2,
+  Star,
+  Tag,
+} from 'lucide-react';
 
 export default function CustomersPage() {
   const [customers] = useState<Customer[]>(mockCustomers);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [segmentFilter, setSegmentFilter] = useState('all');
+  const [priorityFilter, setPriorityFilter] = useState('all');
+
+  const filteredCustomers = customers.filter(customer => {
+    const matchesSearch = customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         customer.email.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = statusFilter === 'all' || customer.status === statusFilter;
+    const matchesSegment = segmentFilter === 'all' || customer.segment === segmentFilter;
+    const matchesPriority = priorityFilter === 'all' || customer.priority === priorityFilter;
+    
+    return matchesSearch && matchesStatus && matchesSegment && matchesPriority;
+  });
+
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case 'active': return 'فعال';
+      case 'inactive': return 'غیرفعال';
+      case 'follow_up': return 'نیاز به پیگیری';
+      case 'rejected': return 'رد شده';
+      default: return status;
+    }
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'active': return 'default';
+      case 'follow_up': return 'destructive';
+      case 'rejected': return 'secondary';
+      default: return 'secondary';
+    }
+  };
+
+  const getSegmentLabel = (segment: string) => {
+    switch (segment) {
+      case 'enterprise': return 'سازمانی';
+      case 'small_business': return 'کسب‌وکار کوچک';
+      case 'individual': return 'فردی';
+      default: return segment;
+    }
+  };
+
+  const getPriorityLabel = (priority: string) => {
+    switch (priority) {
+      case 'high': return 'بالا';
+      case 'medium': return 'متوسط';
+      case 'low': return 'پایین';
+      default: return priority;
+    }
+  };
+
+  const getStageName = (stage: string) => {
+    switch (stage) {
+      case 'new_lead': return 'لید جدید';
+      case 'contacted': return 'تماس برقرار شده';
+      case 'needs_analysis': return 'نیازسنجی';
+      case 'proposal_sent': return 'ارسال پیشنهاد';
+      case 'negotiation': return 'مذاکره';
+      case 'closed_won': return 'بسته شده - برنده';
+      case 'closed_lost': return 'بسته شده - بازنده';
+      default: return stage;
+    }
+  };
+
+  const getStageProgress = (stage: string) => {
+    const stages = ['new_lead', 'contacted', 'needs_analysis', 'proposal_sent', 'negotiation', 'closed_won'];
+    const currentIndex = stages.indexOf(stage);
+    return ((currentIndex + 1) / stages.length) * 100;
+  };
 
   const columns = [
     {
       key: 'name',
-      label: 'نام مشتری',
+      label: 'مشتری',
       sortable: true,
       render: (value: string, row: Customer) => (
-        <div className="flex items-center space-x-2 space-x-reverse">
-          <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
+        <div className="flex items-center space-x-3 space-x-reverse">
+          <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary via-secondary to-accent flex items-center justify-center">
             {row.segment === 'enterprise' ? (
-              <Building className="h-4 w-4 text-primary" />
+              <Building className="h-5 w-5 text-white" />
             ) : (
-              <User className="h-4 w-4 text-primary" />
+              <User className="h-5 w-5 text-white" />
             )}
           </div>
           <div>
-            <p className="font-medium font-vazir">{value}</p>
-            <p className="text-sm text-muted-foreground font-vazir">{row.email}</p>
+            <Link 
+              href={`/dashboard/customers/${row.id}`}
+              className="font-medium font-vazir hover:text-primary transition-colors"
+            >
+              {value}
+            </Link>
+            <div className="flex items-center space-x-2 space-x-reverse mt-1">
+              <span className="text-sm text-muted-foreground font-vazir">{row.email}</span>
+              {row.tags && row.tags.length > 0 && (
+                <div className="flex space-x-1 space-x-reverse">
+                  {row.tags.slice(0, 2).map(tag => (
+                    <Badge key={tag} variant="outline" className="text-xs font-vazir">{tag}</Badge>
+                  ))}
+                  {row.tags.length > 2 && (
+                    <span className="text-xs text-muted-foreground">+{row.tags.length - 2}</span>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
+        </div>
+      ),
+    },
+    {
+      key: 'status',
+      label: 'وضعیت فعلی',
+      sortable: true,
+      render: (value: string, row: Customer) => (
+        <div className="space-y-2">
+          <Badge variant={getStatusColor(value)} className="font-vazir">
+            {getStatusLabel(value)}
+          </Badge>
+          {row.salesPipeline && (
+            <div className="space-y-1">
+              <div className="text-xs text-muted-foreground font-vazir">
+                {getStageName(row.salesPipeline.currentStage)}
+              </div>
+              <Progress 
+                value={getStageProgress(row.salesPipeline.currentStage)} 
+                className="h-1 w-20"
+              />
+            </div>
+          )}
         </div>
       ),
     },
@@ -37,45 +171,88 @@ export default function CustomersPage() {
       key: 'segment',
       label: 'بخش',
       sortable: true,
-      render: (value: string) => (
-        <Badge variant={value === 'enterprise' ? 'default' : 'secondary'} className="font-vazir">
-          {value === 'enterprise' ? 'سازمانی' : 
-           value === 'small_business' ? 'کسب‌وکار کوچک' : 'فردی'}
-        </Badge>
+      render: (value: string, row: Customer) => (
+        <div className="space-y-1">
+          <Badge variant="outline" className="font-vazir">
+            {getSegmentLabel(value)}
+          </Badge>
+          {row.priority && (
+            <div className="flex items-center space-x-1 space-x-reverse">
+              <div className={`h-2 w-2 rounded-full ${
+                row.priority === 'high' ? 'bg-destructive' :
+                row.priority === 'medium' ? 'bg-accent' : 'bg-secondary'
+              }`} />
+              <span className="text-xs text-muted-foreground font-vazir">
+                {getPriorityLabel(row.priority)}
+              </span>
+            </div>
+          )}
+        </div>
       ),
     },
     {
-      key: 'status',
-      label: 'وضعیت',
+      key: 'assignedTo',
+      label: 'مسئول',
       sortable: true,
       render: (value: string) => (
-        <Badge variant={value === 'active' ? 'default' : 'secondary'} className="font-vazir">
-          {value === 'active' ? 'فعال' : 'غیرفعال'}
-        </Badge>
+        <span className="font-vazir">{value || 'تخصیص نیافته'}</span>
       ),
     },
     {
-      key: 'totalTickets',
-      label: 'تیکت‌ها',
+      key: 'potentialValue',
+      label: 'ارزش بالقوه',
       sortable: true,
-      render: (value: number) => (
-        <span className="font-vazir">{value.toLocaleString('fa-IR')}</span>
-      ),
+      render: (value: number) => value ? (
+        <div className="text-left">
+          <span className="font-vazir font-medium">
+            {(value / 1000000).toLocaleString('fa-IR')} میلیون
+          </span>
+          <div className="text-xs text-muted-foreground font-vazir">تومان</div>
+        </div>
+      ) : 'تعریف نشده',
     },
     {
       key: 'satisfactionScore',
-      label: 'امتیاز رضایت',
+      label: 'رضایت',
       sortable: true,
       render: (value: number) => value ? (
-        <span className="font-vazir">{value.toLocaleString('fa-IR')}/۵</span>
+        <div className="flex items-center space-x-1 space-x-reverse">
+          <Star className="h-4 w-4 fill-accent text-accent" />
+          <span className="font-vazir">{value.toLocaleString('fa-IR')}/۵</span>
+        </div>
       ) : 'ندارد',
     },
     {
-      key: 'createdAt',
-      label: 'تاریخ ایجاد',
+      key: 'lastInteraction',
+      label: 'آخرین تعامل',
       sortable: true,
-      render: (value: string) => (
-        <span className="font-vazir">{new Date(value).toLocaleDateString('fa-IR')}</span>
+      render: (value: string) => value ? (
+        <div className="space-y-1">
+          <span className="font-vazir text-sm">
+            {new Date(value).toLocaleDateString('fa-IR')}
+          </span>
+          <div className="text-xs text-muted-foreground font-vazir">
+            {Math.floor((Date.now() - new Date(value).getTime()) / (1000 * 60 * 60 * 24))} روز پیش
+          </div>
+        </div>
+      ) : 'هیچ تعاملی',
+    },
+    {
+      key: 'actions',
+      label: 'عملیات',
+      render: (value: any, row: Customer) => (
+        <div className="flex items-center space-x-2 space-x-reverse">
+          <Link href={`/dashboard/customers/${row.id}`}>
+            <Button size="sm" variant="outline" className="font-vazir">
+              <Eye className="h-4 w-4 ml-1" />
+              مشاهده
+            </Button>
+          </Link>
+          <Button size="sm" variant="outline" className="font-vazir">
+            <Phone className="h-4 w-4 ml-1" />
+            تماس
+          </Button>
+        </div>
       ),
     },
   ];
@@ -88,23 +265,35 @@ export default function CustomersPage() {
     console.log('حذف مشتری:', customer);
   };
 
+  const activeCustomers = customers.filter(c => c.status === 'active');
+  const followUpCustomers = customers.filter(c => c.status === 'follow_up');
+  const highPriorityCustomers = customers.filter(c => c.priority === 'high');
+  const enterpriseCustomers = customers.filter(c => c.segment === 'enterprise');
+
   return (
     <div className="space-y-6 animate-fade-in-up">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold font-vazir bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
-            مشتریان
+            مدیریت مشتریان
           </h1>
-          <p className="text-muted-foreground font-vazir mt-2">مدیریت روابط مشتریان شما</p>
+          <p className="text-muted-foreground font-vazir mt-2">کنترل کامل فرآیند فروش و روابط مشتریان</p>
         </div>
-        <Button className="bg-gradient-to-r from-primary via-secondary to-accent hover:from-primary/90 hover:via-secondary/90 hover:to-accent/90 font-vazir">
-          <Plus className="h-4 w-4 ml-2" />
-          افزودن مشتری
-        </Button>
+        <div className="flex space-x-2 space-x-reverse">
+          <Button variant="outline" className="font-vazir">
+            خروجی CSV
+          </Button>
+          <Link href="/dashboard/customers/new">
+            <Button className="bg-gradient-to-r from-primary via-secondary to-accent hover:from-primary/90 hover:via-secondary/90 hover:to-accent/90 font-vazir">
+              <Plus className="h-4 w-4 ml-2" />
+              مشتری جدید
+            </Button>
+          </Link>
+        </div>
       </div>
 
-      {/* Stats */}
-      <div className="grid gap-4 md:grid-cols-3">
+      {/* آمار کلی */}
+      <div className="grid gap-4 md:grid-cols-4">
         <Card className="border-primary/20 hover:border-primary/40 transition-all duration-300">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium font-vazir">کل مشتریان</CardTitle>
@@ -112,46 +301,196 @@ export default function CustomersPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold font-vazir">{customers.length.toLocaleString('fa-IR')}</div>
+            <p className="text-xs text-muted-foreground font-vazir">
+              {activeCustomers.length.toLocaleString('fa-IR')} مشتری فعال
+            </p>
           </CardContent>
         </Card>
+        
+        <Card className="border-destructive/20 hover:border-destructive/40 transition-all duration-300">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium font-vazir">نیاز به پیگیری</CardTitle>
+            <AlertTriangle className="h-4 w-4 text-destructive" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-destructive font-vazir">
+              {followUpCustomers.length.toLocaleString('fa-IR')}
+            </div>
+            <p className="text-xs text-muted-foreground font-vazir">
+              فوری: {highPriorityCustomers.length.toLocaleString('fa-IR')} مشتری
+            </p>
+          </CardContent>
+        </Card>
+        
         <Card className="border-secondary/20 hover:border-secondary/40 transition-all duration-300">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium font-vazir">سازمانی</CardTitle>
+            <CardTitle className="text-sm font-medium font-vazir">مشتریان سازمانی</CardTitle>
             <Building className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold font-vazir">
-              {customers.filter(c => c.segment === 'enterprise').length.toLocaleString('fa-IR')}
+              {enterpriseCustomers.length.toLocaleString('fa-IR')}
             </div>
+            <p className="text-xs text-muted-foreground font-vazir">
+              ارزش بالا
+            </p>
           </CardContent>
         </Card>
+        
         <Card className="border-accent/20 hover:border-accent/40 transition-all duration-300">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium font-vazir">فعال</CardTitle>
-            <User className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium font-vazir">میانگین رضایت</CardTitle>
+            <Star className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold font-vazir">
-              {customers.filter(c => c.status === 'active').length.toLocaleString('fa-IR')}
+              {(customers.reduce((sum, c) => sum + (c.satisfactionScore || 0), 0) / customers.length).toFixed(1)}/۵
             </div>
+            <p className="text-xs text-muted-foreground font-vazir">
+              امتیاز CSAT
+            </p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Customer Table */}
+      {/* فیلترها */}
+      <Card className="border-border/50">
+        <CardHeader>
+          <CardTitle className="flex items-center space-x-2 space-x-reverse font-vazir">
+            <Filter className="h-5 w-5" />
+            <span>فیلتر و جستجو</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-4 md:grid-cols-5">
+            <div className="relative">
+              <Search className="absolute right-3 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="جستجوی نام یا ایمیل..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pr-10 font-vazir"
+                dir="rtl"
+              />
+            </div>
+            
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="font-vazir">
+                <SelectValue placeholder="وضعیت" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all" className="font-vazir">همه وضعیت‌ها</SelectItem>
+                <SelectItem value="active" className="font-vazir">فعال</SelectItem>
+                <SelectItem value="follow_up" className="font-vazir">نیاز به پیگیری</SelectItem>
+                <SelectItem value="inactive" className="font-vazir">غیرفعال</SelectItem>
+                <SelectItem value="rejected" className="font-vazir">رد شده</SelectItem>
+              </SelectContent>
+            </Select>
+            
+            <Select value={segmentFilter} onValueChange={setSegmentFilter}>
+              <SelectTrigger className="font-vazir">
+                <SelectValue placeholder="بخش" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all" className="font-vazir">همه بخش‌ها</SelectItem>
+                <SelectItem value="enterprise" className="font-vazir">سازمانی</SelectItem>
+                <SelectItem value="small_business" className="font-vazir">کسب‌وکار کوچک</SelectItem>
+                <SelectItem value="individual" className="font-vazir">فردی</SelectItem>
+              </SelectContent>
+            </Select>
+            
+            <Select value={priorityFilter} onValueChange={setPriorityFilter}>
+              <SelectTrigger className="font-vazir">
+                <SelectValue placeholder="اولویت" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all" className="font-vazir">همه اولویت‌ها</SelectItem>
+                <SelectItem value="high" className="font-vazir">بالا</SelectItem>
+                <SelectItem value="medium" className="font-vazir">متوسط</SelectItem>
+                <SelectItem value="low" className="font-vazir">پایین</SelectItem>
+              </SelectContent>
+            </Select>
+            
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                setSearchTerm('');
+                setStatusFilter('all');
+                setSegmentFilter('all');
+                setPriorityFilter('all');
+              }}
+              className="font-vazir"
+            >
+              پاک کردن فیلترها
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* لیست مشتریان */}
       <Card className="border-border/50 hover:border-primary/30 transition-all duration-300">
         <CardHeader>
-          <CardTitle className="font-vazir">لیست مشتریان</CardTitle>
+          <CardTitle className="font-vazir">
+            لیست مشتریان ({filteredCustomers.length.toLocaleString('fa-IR')} مورد)
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <DataTable
-            data={customers}
+            data={filteredCustomers}
             columns={columns}
             onEdit={handleEditCustomer}
             onDelete={handleDeleteCustomer}
           />
         </CardContent>
       </Card>
+
+      {/* مشتریان اولویت بالا */}
+      {highPriorityCustomers.length > 0 && (
+        <Card className="border-destructive/20 bg-destructive/5">
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2 space-x-reverse text-destructive font-vazir">
+              <Target className="h-5 w-5" />
+              <span>مشتریان اولویت بالا - نیاز به اقدام فوری</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-4 md:grid-cols-2">
+              {highPriorityCustomers.map(customer => (
+                <div key={customer.id} className="flex items-center justify-between p-4 bg-white dark:bg-gray-800 rounded-lg border border-destructive/20">
+                  <div className="flex items-center space-x-3 space-x-reverse">
+                    <div className="h-10 w-10 rounded-full bg-gradient-to-br from-destructive to-accent flex items-center justify-center">
+                      <Building className="h-5 w-5 text-white" />
+                    </div>
+                    <div>
+                      <p className="font-medium font-vazir">{customer.name}</p>
+                      <div className="flex items-center space-x-2 space-x-reverse">
+                        <Badge variant="destructive" className="text-xs font-vazir">
+                          {getStatusLabel(customer.status)}
+                        </Badge>
+                        <span className="text-xs text-muted-foreground font-vazir">
+                          {(customer.potentialValue! / 1000000).toLocaleString('fa-IR')}M تومان
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex space-x-2 space-x-reverse">
+                    <Button size="sm" variant="outline" className="font-vazir">
+                      <Phone className="h-4 w-4 ml-1" />
+                      تماس
+                    </Button>
+                    <Link href={`/dashboard/customers/${customer.id}`}>
+                      <Button size="sm" className="font-vazir">
+                        <Eye className="h-4 w-4 ml-1" />
+                        مشاهده
+                      </Button>
+                    </Link>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

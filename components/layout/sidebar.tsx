@@ -20,6 +20,10 @@ import {
   X,
   Building2,
   ChevronLeft,
+  Activity,
+  Calendar,
+  Briefcase,
+  Target,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -53,6 +57,12 @@ const navItems: NavItem[] = [
     icon: Contact,
   },
   {
+    title: 'فعالیت‌ها',
+    href: '/dashboard/activities',
+    icon: Activity,
+    badge: '۱۲',
+  },
+  {
     title: 'پشتیبانی',
     href: '/dashboard/tickets',
     icon: Ticket,
@@ -74,8 +84,19 @@ const navItems: NavItem[] = [
     icon: TrendingUp,
     children: [
       { title: 'پایپ‌لاین', href: '/dashboard/sales', icon: TrendingUp },
-      { title: 'فرصت‌ها', href: '/dashboard/sales/opportunities', icon: TrendingUp },
+      { title: 'فرصت‌ها', href: '/dashboard/sales/opportunities', icon: Target },
     ],
+  },
+  {
+    title: 'پروژه‌ها',
+    href: '/dashboard/projects',
+    icon: Briefcase,
+    badge: '۵',
+  },
+  {
+    title: 'تقویم',
+    href: '/dashboard/calendar',
+    icon: Calendar,
   },
   {
     title: 'گزارش‌ها',
