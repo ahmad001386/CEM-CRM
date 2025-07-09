@@ -1,6 +1,5 @@
 'use client';
 
-import { notFound } from 'next/navigation';
 import { useState } from 'react';
 import { useParams } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -28,15 +27,6 @@ import {
   MessageCircle,
   Activity,
 } from 'lucide-react';
-
-// تولید پارامترهای استاتیک برای export
-export function generateStaticParams() {
-  return [
-    { id: '1' },
-    { id: '2' },
-    { id: '3' },
-  ];
-}
 
 export default function CustomerDetailPage() {
   const params = useParams();
