@@ -26,6 +26,17 @@ export interface SalesPipelineStage {
   activities: Activity[];
   notes: Note[];
   lossReason?: string;
+  stageHistory?: Array<{
+    stage: string;
+    entryDate: string;
+    exitDate?: string | null;
+  }>;
+  productSelected?: boolean;
+  contactMade?: boolean;
+  purchased?: boolean;
+  nextAction?: string;
+  lastContactDate?: string;
+  contactAttempts?: number;
 }
 
 export interface Activity {

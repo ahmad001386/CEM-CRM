@@ -327,6 +327,18 @@ export const mockCustomers: Customer[] = [
       owner: 'مریم احمدی',
       activities: [],
       notes: [],
+      stageHistory: [
+        { stage: 'new_lead', entryDate: '2024-01-15T10:00:00Z', exitDate: '2024-01-16T14:00:00Z' },
+        { stage: 'contacted', entryDate: '2024-01-16T14:00:00Z', exitDate: '2024-01-17T16:00:00Z' },
+        { stage: 'needs_analysis', entryDate: '2024-01-17T16:00:00Z', exitDate: '2024-01-18T10:00:00Z' },
+        { stage: 'proposal_sent', entryDate: '2024-01-18T10:00:00Z', exitDate: null },
+      ],
+      productSelected: true,
+      contactMade: true,
+      purchased: false,
+      nextAction: 'پیگیری پیشنهاد ارسالی',
+      lastContactDate: '2024-01-20T14:30:00Z',
+      contactAttempts: 3,
     },
   },
   {

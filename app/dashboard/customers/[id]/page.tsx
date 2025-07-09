@@ -1,5 +1,6 @@
 'use client';
 
+import { notFound } from 'next/navigation';
 import { useState } from 'react';
 import { useParams } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -27,6 +28,15 @@ import {
   MessageCircle,
   Activity,
 } from 'lucide-react';
+
+// تولید پارامترهای استاتیک برای export
+export function generateStaticParams() {
+  return [
+    { id: '1' },
+    { id: '2' },
+    { id: '3' },
+  ];
+}
 
 export default function CustomerDetailPage() {
   const params = useParams();
@@ -198,7 +208,56 @@ export default function CustomerDetailPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
+            <div className="space-y-6">
+              {/* وضعیت کلی فرآیند */}
+              <div className="grid grid-cols-3 gap-4">
+                <div className="text-center p-4 border border-border/50 rounded-lg">
+                  <div className={`text-2xl font-bold mb-2 ${customer.salesPipeline.productSelected ? 'text-green-600' : 'text-red-600'}`}>
+                    {customer.salesPipeline.productSelected ? '✓' : '✗'}
+                  </div>
+                  <p className="text-sm font-vazir">محصول انتخاب شده</p>
+                </div>
+                <div className="text-center p-4 border border-border/50 rounded-lg">
+                  <div className={`text-2xl font-bold mb-2 ${customer.salesPipeline.contactMade ? 'text-green-600' : 'text-red-600'}`}>
+                    {customer.salesPipeline.contactMade ? '✓' : '✗'}
+                  </div>
+                  <p className="text-sm font-vazir">تماس برقرار شده</p>
+                </div>
+                <div className="text-center p-4 border border-border/50 rounded-lg">
+                  <div className={`text-2xl font-bold mb-2 ${customer.salesPipeline.purchased ? 'text-green-600' : 'text-red-600'}`}>
+                    {customer.salesPipeline.purchased ? '✓' : '✗'}
+                  </div>
+                  <p className="text-sm font-vazir">خریداری شده</p>
+                </div>
+              </div>
+
+              {/* اطلاعات تماس */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-4 bg-primary/5 rounded-lg border border-primary/20">
+                  <h4 className="font-medium font-vazir mb-2">آخرین تماس</h4>
+                  <p className="text-sm text-muted-foreground font-vazir">
+                    {customer.salesPipeline.lastContactDate 
+                      ? new Date(customer.salesPipeline.lastContactDate).toLocaleDateString('fa-IR')
+                      : 'تماسی برقرار نشده'
+                    }
+                  </p>
+                </div>
+                <div className="p-4 bg-secondary/5 rounded-lg border border-secondary/20">
+                  <h4 className="font-medium font-vazir mb-2">تعداد تماس‌ها</h4>
+                  <p className="text-sm text-muted-foreground font-vazir">
+                    {customer.salesPipeline.contactAttempts?.toLocaleString('fa-IR') || '۰'} بار
+                  </p>
+                </div>
+              </div>
+
+              {/* اقدام بعدی */}
+              {customer.salesPipeline.nextAction && (
+                <div className="p-4 bg-accent/5 rounded-lg border border-accent/20">
+                  <h4 className="font-medium font-vazir mb-2">اقدام بعدی</h4>
+                  <p className="text-sm font-vazir">{customer.salesPipeline.nextAction}</p>
+                </div>
+              )}
+
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="font-medium font-vazir">
@@ -242,6 +301,31 @@ export default function CustomerDetailPage() {
                   </div>
                 ))}
               </div>
+
+              {/* تاریخچه مراحل */}
+              {customer.salesPipeline.stageHistory && (
+                <div className="mt-6">
+                  <h4 className="font-medium font-vazir mb-4">تاریخچه مراحل</h4>
+                  <div className="space-y-2">
+                    {customer.salesPipeline.stageHistory.map((history, index) => (
+                      <div key={index} className="flex items-center justify-between p-3 border border-border/50 rounded-lg">
+                        <div className="flex items-center space-x-3 space-x-reverse">
+                          <div className={`w-3 h-3 rounded-full ${
+                            history.exitDate ? 'bg-green-500' : 'bg-primary'
+                          }`} />
+                          <span className="font-vazir">{getStageName(history.stage)}</span>
+                        </div>
+                        <div className="text-sm text-muted-foreground font-vazir">
+                          {new Date(history.entryDate).toLocaleDateString('fa-IR')}
+                          {history.exitDate && (
+                            <span> - {new Date(history.exitDate).toLocaleDateString('fa-IR')}</span>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
