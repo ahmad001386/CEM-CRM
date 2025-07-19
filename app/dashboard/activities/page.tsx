@@ -27,6 +27,8 @@ import {
   AlertCircle,
   XCircle,
   Activity as ActivityIcon,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react';
 
 export default function ActivitiesPage() {
@@ -46,12 +48,18 @@ export default function ActivitiesPage() {
     outcome: 'successful',
   });
 
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [calendarView, setCalendarView] = useState<'month' | 'week' | 'day'>('month');
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+
+  const persianDays = ['شنبه', 'یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنج‌شنبه', 'جمعه'];
+
   const filteredActivities = activities.filter(activity => {
     const matchesSearch = activity.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         activity.customerName.toLowerCase().includes(searchTerm.toLowerCase());
+      activity.customerName.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesType = filterType === 'all' || activity.type === filterType;
     const matchesOutcome = filterOutcome === 'all' || activity.outcome === filterOutcome;
-    
+
     return matchesSearch && matchesType && matchesOutcome;
   });
 
@@ -135,7 +143,7 @@ export default function ActivitiesPage() {
     });
   };
 
-  const todayActivities = activities.filter(activity => 
+  const todayActivities = activities.filter(activity =>
     new Date(activity.startTime).toDateString() === new Date().toDateString()
   );
 
@@ -154,6 +162,86 @@ export default function ActivitiesPage() {
     followUp: activities.filter(a => a.outcome === 'follow_up_needed').length,
   };
 
+  const navigateMonth = (direction: 'prev' | 'next') => {
+    const newDate = new Date(currentDate);
+    if (direction === 'prev') {
+      newDate.setMonth(newDate.getMonth() - 1);
+    } else {
+      newDate.setMonth(newDate.getMonth() + 1);
+    }
+    setCurrentDate(newDate);
+  };
+
+  const getActivitiesForDate = (date: Date) => {
+    return activities.filter(activity => {
+      const activityDate = new Date(activity.startTime);
+      return activityDate.toDateString() === date.toDateString();
+    });
+  };
+
+  const renderCalendar = () => {
+    const firstDay = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+    const lastDay = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+    const daysInMonth = lastDay.getDate();
+    const startingDayOfWeek = firstDay.getDay();
+
+    const days = [];
+
+    // روزهای خالی ابتدای ماه
+    for (let i = 0; i < startingDayOfWeek; i++) {
+      days.push(<div key={`empty-${i}`} className="h-32 border border-border/20"></div>);
+    }
+
+    // روزهای ماه
+    for (let day = 1; day <= daysInMonth; day++) {
+      const date = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
+      const dayActivities = getActivitiesForDate(date);
+      const isToday = date.toDateString() === new Date().toDateString();
+
+      days.push(
+        <div
+          key={day}
+          className={`h-32 border border-border/20 p-2 ${isToday ? 'bg-primary/5 border-primary/30' : ''} cursor-pointer hover:border-primary/50`}
+          onClick={() => {
+            setSelectedDate(date);
+            setShowAddForm(true);
+            setNewActivity(prev => ({
+              ...prev,
+              startTime: date.toISOString().split('T')[0],
+            }));
+          }}
+        >
+          <div className={`text-sm font-medium mb-2 font-vazir ${isToday ? 'text-primary' : ''}`}>
+            {day.toLocaleString('fa-IR')}
+          </div>
+          <div className="space-y-1">
+            {dayActivities.slice(0, 2).map(activity => (
+              <div key={activity.id} className={`text-xs p-1 rounded truncate font-vazir ${getActivityColor(activity.type)}`}>
+                {activity.title}
+              </div>
+            ))}
+            {dayActivities.length > 2 && (
+              <div className="text-xs text-muted-foreground font-vazir">
+                +{(dayActivities.length - 2).toLocaleString('fa-IR')} مورد دیگر
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="grid grid-cols-7 gap-0 border border-border/20 rounded-lg overflow-hidden">
+        {persianDays.map(day => (
+          <div key={day} className="bg-muted p-3 text-center font-medium font-vazir border-b border-border/20">
+            {day}
+          </div>
+        ))}
+        {days}
+      </div>
+    );
+  };
+
   return (
     <div className="space-y-6 animate-fade-in-up">
       <div className="flex items-center justify-between">
@@ -163,7 +251,7 @@ export default function ActivitiesPage() {
           </h1>
           <p className="text-muted-foreground font-vazir mt-2">پیگیری و ثبت تمام تعاملات با مشتریان</p>
         </div>
-        <Button 
+        <Button
           onClick={() => setShowAddForm(true)}
           className="bg-gradient-to-r from-primary via-secondary to-accent hover:from-primary/90 hover:via-secondary/90 hover:to-accent/90 font-vazir"
         >
@@ -183,7 +271,7 @@ export default function ActivitiesPage() {
             <div className="text-2xl font-bold font-vazir">{activityStats.total.toLocaleString('fa-IR')}</div>
           </CardContent>
         </Card>
-        
+
         <Card className="border-secondary/20 hover:border-secondary/40 transition-all duration-300">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium font-vazir">امروز</CardTitle>
@@ -193,7 +281,7 @@ export default function ActivitiesPage() {
             <div className="text-2xl font-bold font-vazir">{activityStats.today.toLocaleString('fa-IR')}</div>
           </CardContent>
         </Card>
-        
+
         <Card className="border-accent/20 hover:border-accent/40 transition-all duration-300">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium font-vazir">این هفته</CardTitle>
@@ -203,7 +291,7 @@ export default function ActivitiesPage() {
             <div className="text-2xl font-bold font-vazir">{activityStats.thisWeek.toLocaleString('fa-IR')}</div>
           </CardContent>
         </Card>
-        
+
         <Card className="border-green-200 hover:border-green-400 transition-all duration-300">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium font-vazir">موفق</CardTitle>
@@ -213,7 +301,7 @@ export default function ActivitiesPage() {
             <div className="text-2xl font-bold text-green-600 font-vazir">{activityStats.successful.toLocaleString('fa-IR')}</div>
           </CardContent>
         </Card>
-        
+
         <Card className="border-yellow-200 hover:border-yellow-400 transition-all duration-300">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium font-vazir">نیاز به پیگیری</CardTitle>
@@ -235,7 +323,7 @@ export default function ActivitiesPage() {
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="activity-type" className="font-vazir">نوع فعالیت</Label>
-                <Select value={newActivity.type} onValueChange={(value) => setNewActivity({...newActivity, type: value})}>
+                <Select value={newActivity.type} onValueChange={(value) => setNewActivity({ ...newActivity, type: value })}>
                   <SelectTrigger className="font-vazir">
                     <SelectValue />
                   </SelectTrigger>
@@ -252,7 +340,7 @@ export default function ActivitiesPage() {
 
               <div className="space-y-2">
                 <Label htmlFor="customer" className="font-vazir">مشتری</Label>
-                <Select value={newActivity.customerId} onValueChange={(value) => setNewActivity({...newActivity, customerId: value})}>
+                <Select value={newActivity.customerId} onValueChange={(value) => setNewActivity({ ...newActivity, customerId: value })}>
                   <SelectTrigger className="font-vazir">
                     <SelectValue placeholder="انتخاب مشتری" />
                   </SelectTrigger>
@@ -271,7 +359,7 @@ export default function ActivitiesPage() {
                 <Input
                   id="title"
                   value={newActivity.title}
-                  onChange={(e) => setNewActivity({...newActivity, title: e.target.value})}
+                  onChange={(e) => setNewActivity({ ...newActivity, title: e.target.value })}
                   placeholder="عنوان فعالیت"
                   className="font-vazir"
                   dir="rtl"
@@ -280,7 +368,7 @@ export default function ActivitiesPage() {
 
               <div className="space-y-2">
                 <Label htmlFor="outcome" className="font-vazir">نتیجه</Label>
-                <Select value={newActivity.outcome} onValueChange={(value) => setNewActivity({...newActivity, outcome: value})}>
+                <Select value={newActivity.outcome} onValueChange={(value) => setNewActivity({ ...newActivity, outcome: value })}>
                   <SelectTrigger className="font-vazir">
                     <SelectValue />
                   </SelectTrigger>
@@ -298,7 +386,7 @@ export default function ActivitiesPage() {
                 <Textarea
                   id="description"
                   value={newActivity.description}
-                  onChange={(e) => setNewActivity({...newActivity, description: e.target.value})}
+                  onChange={(e) => setNewActivity({ ...newActivity, description: e.target.value })}
                   placeholder="توضیحات تفصیلی فعالیت..."
                   rows={3}
                   className="font-vazir"
@@ -339,7 +427,7 @@ export default function ActivitiesPage() {
                 dir="rtl"
               />
             </div>
-            
+
             <Select value={filterType} onValueChange={setFilterType}>
               <SelectTrigger className="font-vazir">
                 <SelectValue placeholder="نوع فعالیت" />
@@ -353,7 +441,7 @@ export default function ActivitiesPage() {
                 <SelectItem value="whatsapp" className="font-vazir">واتساپ</SelectItem>
               </SelectContent>
             </Select>
-            
+
             <Select value={filterOutcome} onValueChange={setFilterOutcome}>
               <SelectTrigger className="font-vazir">
                 <SelectValue placeholder="نتیجه" />
@@ -366,9 +454,9 @@ export default function ActivitiesPage() {
                 <SelectItem value="completed" className="font-vazir">تکمیل شده</SelectItem>
               </SelectContent>
             </Select>
-            
-            <Button 
-              variant="outline" 
+
+            <Button
+              variant="outline"
               onClick={() => {
                 setSearchTerm('');
                 setFilterType('all');
@@ -379,6 +467,40 @@ export default function ActivitiesPage() {
               پاک کردن فیلترها
             </Button>
           </div>
+        </CardContent>
+      </Card>
+
+      {/* تقویم */}
+      <Card className="border-border/50 hover:border-primary/30 transition-all duration-300">
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center space-x-2 space-x-reverse font-vazir">
+              <Calendar className="h-5 w-5" />
+              <span>تقویم فعالیت‌ها</span>
+            </CardTitle>
+            <div className="flex items-center space-x-2 space-x-reverse">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => navigateMonth('prev')}
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => navigateMonth('next')}
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <div className="font-vazir text-sm mx-4">
+                {new Intl.DateTimeFormat('fa-IR', { year: 'numeric', month: 'long' }).format(currentDate)}
+              </div>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {renderCalendar()}
         </CardContent>
       </Card>
 
@@ -403,7 +525,7 @@ export default function ActivitiesPage() {
                 {filteredActivities.map((activity) => {
                   const Icon = getActivityIcon(activity.type);
                   const OutcomeIcon = getOutcomeIcon(activity.outcome);
-                  
+
                   return (
                     <div key={activity.id} className="flex items-start space-x-4 space-x-reverse p-4 border border-border/50 rounded-lg hover:border-primary/30 transition-all duration-300">
                       <div className={`p-2 rounded-full ${getActivityColor(activity.type)}`}>
@@ -426,10 +548,10 @@ export default function ActivitiesPage() {
                             {getTypeLabel(activity.type)}
                           </span>
                           <span className="text-xs text-muted-foreground font-vazir">
-                            {new Date(activity.startTime).toLocaleDateString('fa-IR')} - 
-                            {new Date(activity.startTime).toLocaleTimeString('fa-IR', { 
-                              hour: '2-digit', 
-                              minute: '2-digit' 
+                            {new Date(activity.startTime).toLocaleDateString('fa-IR')} -
+                            {new Date(activity.startTime).toLocaleTimeString('fa-IR', {
+                              hour: '2-digit',
+                              minute: '2-digit'
                             })}
                           </span>
                           <span className="text-xs text-muted-foreground font-vazir">
@@ -467,7 +589,7 @@ export default function ActivitiesPage() {
                 {todayActivities.map((activity) => {
                   const Icon = getActivityIcon(activity.type);
                   const OutcomeIcon = getOutcomeIcon(activity.outcome);
-                  
+
                   return (
                     <div key={activity.id} className="flex items-start space-x-4 space-x-reverse p-4 border border-border/50 rounded-lg hover:border-primary/30 transition-all duration-300">
                       <div className={`p-2 rounded-full ${getActivityColor(activity.type)}`}>
@@ -511,7 +633,7 @@ export default function ActivitiesPage() {
                 {thisWeekActivities.map((activity) => {
                   const Icon = getActivityIcon(activity.type);
                   const OutcomeIcon = getOutcomeIcon(activity.outcome);
-                  
+
                   return (
                     <div key={activity.id} className="flex items-start space-x-4 space-x-reverse p-4 border border-border/50 rounded-lg hover:border-primary/30 transition-all duration-300">
                       <div className={`p-2 rounded-full ${getActivityColor(activity.type)}`}>
@@ -557,7 +679,7 @@ export default function ActivitiesPage() {
               <div className="space-y-4">
                 {activities.filter(a => a.outcome === 'follow_up_needed').map((activity) => {
                   const Icon = getActivityIcon(activity.type);
-                  
+
                   return (
                     <div key={activity.id} className="flex items-start space-x-4 space-x-reverse p-4 border border-yellow-200 bg-yellow-50 dark:border-yellow-800 dark:bg-yellow-900/20 rounded-lg">
                       <div className={`p-2 rounded-full ${getActivityColor(activity.type)}`}>

@@ -1,0 +1,175 @@
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+
+const mockData = {
+    summary: {
+        total: 248,
+        byChannel: {
+            email: 89,
+            phone: 76,
+            chat: 45,
+            inPerson: 38
+        }
+    },
+    touchpoints: [
+        {
+            id: 1,
+            customerName: 'شرکت الف',
+            type: 'support',
+            channel: 'email',
+            date: '1402/04/15',
+            score: 4.5,
+            agent: 'علی محمدی',
+            description: 'درخواست راهنمایی برای نصب نسخه جدید',
+            status: 'completed'
+        },
+        {
+            id: 2,
+            customerName: 'شرکت ب',
+            type: 'sales',
+            channel: 'phone',
+            date: '1402/04/14',
+            score: 4.0,
+            agent: 'مریم احمدی',
+            description: 'جلسه معرفی محصول جدید',
+            status: 'scheduled'
+        },
+        {
+            id: 3,
+            customerName: 'شرکت ج',
+            type: 'feedback',
+            channel: 'chat',
+            date: '1402/04/14',
+            score: 3.5,
+            agent: 'رضا کریمی',
+            description: 'دریافت بازخورد در مورد ویژگی جدید',
+            status: 'in_progress'
+        }
+    ]
+};
+
+const channelColors = {
+    email: 'bg-blue-50 text-blue-600',
+    phone: 'bg-green-50 text-green-600',
+    chat: 'bg-purple-50 text-purple-600',
+    inPerson: 'bg-orange-50 text-orange-600'
+};
+
+const statusColors = {
+    completed: 'bg-green-50 text-green-600',
+    in_progress: 'bg-yellow-50 text-yellow-600',
+    scheduled: 'bg-blue-50 text-blue-600'
+};
+
+const typeColors = {
+    support: 'bg-purple-50 text-purple-600',
+    sales: 'bg-blue-50 text-blue-600',
+    feedback: 'bg-green-50 text-green-600'
+};
+
+export default function TouchpointsPage() {
+    return (
+        <div className="container mx-auto p-6">
+            <div className="flex justify-between items-center mb-6">
+                <div>
+                    <h1 className="text-2xl font-bold mb-2">نقاط تماس (Touchpoints)</h1>
+                    <p className="text-muted-foreground">مدیریت و پیگیری تمام تعاملات با مشتریان</p>
+                </div>
+                <Button>ثبت تعامل جدید</Button>
+            </div>
+
+            {/* Summary Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                <Card className="p-4">
+                    <h3 className="text-sm font-medium text-muted-foreground mb-2">کل تعاملات</h3>
+                    <p className="text-3xl font-bold">{mockData.summary.total}</p>
+                </Card>
+                <Card className="p-4">
+                    <h3 className="text-sm font-medium text-muted-foreground mb-2">ایمیل</h3>
+                    <p className="text-3xl font-bold text-blue-600">{mockData.summary.byChannel.email}</p>
+                </Card>
+                <Card className="p-4">
+                    <h3 className="text-sm font-medium text-muted-foreground mb-2">تلفن</h3>
+                    <p className="text-3xl font-bold text-green-600">{mockData.summary.byChannel.phone}</p>
+                </Card>
+                <Card className="p-4">
+                    <h3 className="text-sm font-medium text-muted-foreground mb-2">چت</h3>
+                    <p className="text-3xl font-bold text-purple-600">{mockData.summary.byChannel.chat}</p>
+                </Card>
+            </div>
+
+            {/* Filters */}
+            <Card className="p-4 mb-6">
+                <div className="flex flex-wrap gap-4">
+                    <div className="flex-1 min-w-[200px]">
+                        <label className="text-sm font-medium">نوع تعامل</label>
+                        <select className="w-full mt-1 rounded-md border border-input px-3 py-2" title="نوع تعامل">
+                            <option value="all">همه</option>
+                            <option value="support">پشتیبانی</option>
+                            <option value="sales">فروش</option>
+                            <option value="feedback">بازخورد</option>
+                        </select>
+                    </div>
+                    <div className="flex-1 min-w-[200px]">
+                        <label className="text-sm font-medium">کانال</label>
+                        <select className="w-full mt-1 rounded-md border border-input px-3 py-2" title="کانال">
+                            <option value="all">همه</option>
+                            <option value="email">ایمیل</option>
+                            <option value="phone">تلفن</option>
+                            <option value="chat">چت</option>
+                        </select>
+                    </div>
+                    <div className="flex-1 min-w-[200px]">
+                        <label className="text-sm font-medium">وضعیت</label>
+                        <select className="w-full mt-1 rounded-md border border-input px-3 py-2" title="وضعیت">
+                            <option value="all">همه</option>
+                            <option value="completed">تکمیل شده</option>
+                            <option value="in_progress">در حال انجام</option>
+                            <option value="scheduled">برنامه‌ریزی شده</option>
+                        </select>
+                    </div>
+                </div>
+            </Card>
+
+            {/* Touchpoints List */}
+            <div className="space-y-4">
+                {mockData.touchpoints.map(touchpoint => (
+                    <Card key={touchpoint.id} className="p-4">
+                        <div className="flex items-start justify-between mb-4">
+                            <div className="space-y-1">
+                                <div className="flex items-center gap-2 mb-2">
+                                    <h3 className="text-lg font-medium">{touchpoint.customerName}</h3>
+                                    <Badge className={typeColors[touchpoint.type]}>
+                                        {touchpoint.type === 'support' ? 'پشتیبانی' :
+                                            touchpoint.type === 'sales' ? 'فروش' : 'بازخورد'}
+                                    </Badge>
+                                    <Badge className={channelColors[touchpoint.channel]}>
+                                        {touchpoint.channel === 'email' ? 'ایمیل' :
+                                            touchpoint.channel === 'phone' ? 'تلفن' : 'چت'}
+                                    </Badge>
+                                    <Badge className={statusColors[touchpoint.status]}>
+                                        {touchpoint.status === 'completed' ? 'تکمیل شده' :
+                                            touchpoint.status === 'in_progress' ? 'در حال انجام' : 'برنامه‌ریزی شده'}
+                                    </Badge>
+                                </div>
+                                <p className="text-muted-foreground">{touchpoint.description}</p>
+                            </div>
+                            {touchpoint.score && (
+                                <div className="text-2xl font-bold text-primary">{touchpoint.score}/5</div>
+                            )}
+                        </div>
+
+                        <div className="flex justify-between items-center text-sm text-muted-foreground">
+                            <div className="flex gap-4">
+                                <span>تاریخ: {touchpoint.date}</span>
+                                <span>کارشناس: {touchpoint.agent}</span>
+                            </div>
+                            <Button variant="outline" size="sm">جزئیات بیشتر</Button>
+                        </div>
+                    </Card>
+                ))}
+            </div>
+        </div>
+    );
+}

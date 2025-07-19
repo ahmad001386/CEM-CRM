@@ -4,363 +4,413 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { mockCalendarEvents, mockTasks } from '@/lib/mock-data';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import {
-  Calendar,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
   Plus,
-  ChevronLeft,
-  ChevronRight,
-  Phone,
-  Users,
   Clock,
-  MapPin,
+  CheckCircle2,
+  AlertCircle,
+  User,
+  Calendar,
+  Filter,
+  Users,
 } from 'lucide-react';
 
-export default function CalendarPage() {
-  const [currentDate, setCurrentDate] = useState(new Date());
-  const [view, setView] = useState<'month' | 'week' | 'day'>('month');
+// نمونه داده برای کاربران
+const mockUsers = [
+  {
+    id: '1',
+    name: 'علی محمدی',
+    email: 'ali@example.com',
+    avatar: null,
+    role: 'مدیر فروش',
+  },
+  {
+    id: '2',
+    name: 'سارا احمدی',
+    email: 'sara@example.com',
+    avatar: null,
+    role: 'کارشناس پشتیبانی',
+  },
+  {
+    id: '3',
+    name: 'رضا کریمی',
+    email: 'reza@example.com',
+    avatar: null,
+    role: 'توسعه‌دهنده',
+  },
+  {
+    id: '4',
+    name: 'مریم حسینی',
+    email: 'maryam@example.com',
+    avatar: null,
+    role: 'مدیر محصول',
+  },
+];
 
-  // تقویم فارسی
-  const persianMonths = [
-    'فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور',
-    'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند'
-  ];
+// نمونه داده برای وظایف
+const mockTasks = [
+  {
+    id: '1',
+    title: 'تماس با مشتری جدید',
+    description: 'پیگیری درخواست همکاری و ارسال پیش‌فاکتور',
+    status: 'pending',
+    priority: 'high',
+    dueDate: '2025-07-20',
+    assignee: {
+      name: 'علی محمدی',
+      avatar: null,
+      email: 'ali@example.com',
+    },
+    completed: false,
+  },
+  {
+    id: '2',
+    title: 'بررسی گزارش ماهانه',
+    description: 'تحلیل عملکرد تیم فروش و تهیه گزارش برای مدیریت',
+    status: 'in_progress',
+    priority: 'medium',
+    dueDate: '2025-07-18',
+    assignee: {
+      name: 'سارا احمدی',
+      avatar: null,
+      email: 'sara@example.com',
+    },
+    completed: false,
+  },
+  {
+    id: '3',
+    title: 'به‌روزرسانی وب‌سایت',
+    description: 'اضافه کردن محصولات جدید و به‌روزرسانی قیمت‌ها',
+    status: 'completed',
+    priority: 'low',
+    dueDate: '2025-07-15',
+    assignee: {
+      name: 'رضا کریمی',
+      avatar: null,
+      email: 'reza@example.com',
+    },
+    completed: true,
+  },
+];
 
-  const persianDays = ['شنبه', 'یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنج‌شنبه', 'جمعه'];
+export default function TasksPage() {
+  const [tasks, setTasks] = useState(mockTasks);
+  const [showAddTask, setShowAddTask] = useState(false);
+  const [newTask, setNewTask] = useState({
+    title: '',
+    description: '',
+    assigneeId: '',
+    priority: 'medium',
+    dueDate: '',
+  });
 
-  const toPersianDate = (date: Date) => {
-    // تبدیل ساده به تقویم فارسی (برای نمایش)
-    const persianDate = new Intl.DateTimeFormat('fa-IR').format(date);
-    return persianDate;
+  const toggleTaskCompletion = (taskId: string) => {
+    setTasks(tasks.map(task =>
+      task.id === taskId ? { ...task, completed: !task.completed } : task
+    ));
   };
 
-  const getCurrentPersianMonth = () => {
-    const month = currentDate.getMonth();
-    return persianMonths[month];
-  };
-
-  const getCurrentPersianYear = () => {
-    return (currentDate.getFullYear() - 621).toString();
-  };
-
-  const navigateMonth = (direction: 'prev' | 'next') => {
-    const newDate = new Date(currentDate);
-    if (direction === 'prev') {
-      newDate.setMonth(newDate.getMonth() - 1);
-    } else {
-      newDate.setMonth(newDate.getMonth() + 1);
-    }
-    setCurrentDate(newDate);
-  };
-
-  const getEventsForDate = (date: Date) => {
-    return mockCalendarEvents.filter(event => {
-      const eventDate = new Date(event.startDate);
-      return eventDate.toDateString() === date.toDateString();
+  const handleAddTask = () => {
+    const assignee = mockUsers.find(user => user.id === newTask.assigneeId);
+    const task = {
+      id: (tasks.length + 1).toString(),
+      ...newTask,
+      status: 'pending',
+      completed: false,
+      assignee: assignee || mockUsers[0],
+    };
+    setTasks([task, ...tasks]);
+    setShowAddTask(false);
+    setNewTask({
+      title: '',
+      description: '',
+      assigneeId: '',
+      priority: 'medium',
+      dueDate: '',
     });
   };
 
-  const getTasksForDate = (date: Date) => {
-    return mockTasks.filter(task => {
-      const taskDate = new Date(task.dueDate);
-      return taskDate.toDateString() === date.toDateString();
-    });
+  const getPriorityColor = (priority: string) => {
+    switch (priority) {
+      case 'high': return 'text-red-500 bg-red-50 dark:bg-red-950';
+      case 'medium': return 'text-yellow-500 bg-yellow-50 dark:bg-yellow-950';
+      case 'low': return 'text-green-500 bg-green-50 dark:bg-green-950';
+      default: return 'text-gray-500 bg-gray-50 dark:bg-gray-950';
+    }
   };
 
-  const renderMonthView = () => {
-    const firstDay = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
-    const lastDay = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
-    const daysInMonth = lastDay.getDate();
-    const startingDayOfWeek = firstDay.getDay();
-
-    const days = [];
-    
-    // روزهای خالی ابتدای ماه
-    for (let i = 0; i < startingDayOfWeek; i++) {
-      days.push(<div key={`empty-${i}`} className="h-32 border border-border/20"></div>);
+  const getPriorityLabel = (priority: string) => {
+    switch (priority) {
+      case 'high': return 'ضروری';
+      case 'medium': return 'متوسط';
+      case 'low': return 'عادی';
+      default: return priority;
     }
-
-    // روزهای ماه
-    for (let day = 1; day <= daysInMonth; day++) {
-      const date = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
-      const events = getEventsForDate(date);
-      const tasks = getTasksForDate(date);
-      const isToday = date.toDateString() === new Date().toDateString();
-
-      days.push(
-        <div key={day} className={`h-32 border border-border/20 p-2 ${isToday ? 'bg-primary/5 border-primary/30' : ''}`}>
-          <div className={`text-sm font-medium mb-2 font-vazir ${isToday ? 'text-primary' : ''}`}>
-            {day.toLocaleString('fa-IR')}
-          </div>
-          <div className="space-y-1">
-            {events.slice(0, 2).map(event => (
-              <div key={event.id} className={`text-xs p-1 rounded truncate font-vazir ${
-                event.type === 'meeting' ? 'bg-primary/10 text-primary' :
-                event.type === 'call' ? 'bg-secondary/10 text-secondary' : 'bg-accent/10 text-accent'
-              }`}>
-                {event.title}
-              </div>
-            ))}
-            {tasks.slice(0, 1).map(task => (
-              <div key={task.id} className="text-xs p-1 rounded truncate bg-gray-100 dark:bg-gray-800 font-vazir">
-                {task.title}
-              </div>
-            ))}
-            {(events.length + tasks.length) > 3 && (
-              <div className="text-xs text-muted-foreground font-vazir">
-                +{(events.length + tasks.length - 3).toLocaleString('fa-IR')} مورد دیگر
-              </div>
-            )}
-          </div>
-        </div>
-      );
-    }
-
-    return (
-      <div className="grid grid-cols-7 gap-0 border border-border/20 rounded-lg overflow-hidden">
-        {persianDays.map(day => (
-          <div key={day} className="bg-muted p-3 text-center font-medium font-vazir border-b border-border/20">
-            {day}
-          </div>
-        ))}
-        {days}
-      </div>
-    );
-  };
-
-  const renderTodayEvents = () => {
-    const today = new Date();
-    const todayEvents = getEventsForDate(today);
-    const todayTasks = getTasksForDate(today);
-
-    return (
-      <Card className="border-border/50 hover:border-primary/30 transition-all duration-300">
-        <CardHeader>
-          <CardTitle className="flex items-center space-x-2 space-x-reverse font-vazir">
-            <Clock className="h-5 w-5" />
-            <span>برنامه امروز</span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
-            {todayEvents.map(event => (
-              <div key={event.id} className="flex items-center justify-between p-3 border border-border/50 rounded-lg hover:border-primary/30 transition-all duration-300">
-                <div className="flex items-center space-x-3 space-x-reverse">
-                  <div className={`p-2 rounded-full ${
-                    event.type === 'meeting' ? 'bg-primary/10 text-primary' :
-                    event.type === 'call' ? 'bg-secondary/10 text-secondary' : 'bg-accent/10 text-accent'
-                  }`}>
-                    {event.type === 'meeting' ? <Users className="h-4 w-4" /> : <Phone className="h-4 w-4" />}
-                  </div>
-                  <div>
-                    <p className="font-medium font-vazir">{event.title}</p>
-                    <p className="text-sm text-muted-foreground font-vazir">
-                      {new Date(event.startDate).toLocaleTimeString('fa-IR', { 
-                        hour: '2-digit', 
-                        minute: '2-digit' 
-                      })} - {event.customerName}
-                    </p>
-                    {event.location && (
-                      <p className="text-xs text-muted-foreground flex items-center space-x-1 space-x-reverse mt-1">
-                        <MapPin className="h-3 w-3" />
-                        <span className="font-vazir">{event.location}</span>
-                      </p>
-                    )}
-                  </div>
-                </div>
-                <Badge variant={event.status === 'scheduled' ? 'default' : 'secondary'} className="font-vazir">
-                  {event.status === 'scheduled' ? 'برنامه‌ریزی شده' : 
-                   event.status === 'completed' ? 'تکمیل شده' : 'لغو شده'}
-                </Badge>
-              </div>
-            ))}
-            
-            {todayTasks.map(task => (
-              <div key={task.id} className="flex items-center justify-between p-3 border border-border/50 rounded-lg hover:border-accent/30 transition-all duration-300">
-                <div className="flex items-center space-x-3 space-x-reverse">
-                  <div className={`h-3 w-3 rounded-full ${
-                    task.priority === 'high' ? 'bg-destructive' :
-                    task.priority === 'medium' ? 'bg-accent' : 'bg-secondary'
-                  }`} />
-                  <div>
-                    <p className="font-medium font-vazir">{task.title}</p>
-                    <p className="text-sm text-muted-foreground font-vazir">{task.description}</p>
-                  </div>
-                </div>
-                <Badge variant={
-                  task.status === 'pending' ? 'destructive' :
-                  task.status === 'in_progress' ? 'default' : 'secondary'
-                } className="font-vazir">
-                  {task.status === 'pending' ? 'در انتظار' :
-                   task.status === 'in_progress' ? 'در حال انجام' : 'تکمیل'}
-                </Badge>
-              </div>
-            ))}
-
-            {todayEvents.length === 0 && todayTasks.length === 0 && (
-              <p className="text-center text-muted-foreground font-vazir py-4">
-                برنامه‌ای برای امروز وجود ندارد
-              </p>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-    );
   };
 
   return (
     <div className="space-y-6 animate-fade-in-up">
-      {/* Header */}
+      {/* هدر */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold font-vazir bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
-            تقویم کاری
+            مدیریت وظایف
           </h1>
-          <p className="text-muted-foreground font-vazir mt-2">مدیریت جلسات، تماس‌ها و تسک‌ها</p>
+          <p className="text-muted-foreground font-vazir mt-2">مدیریت و پیگیری وظایف تیم</p>
         </div>
-        <div className="flex space-x-2 space-x-reverse">
-          <div className="flex border border-border rounded-lg">
+        <Dialog open={showAddTask} onOpenChange={setShowAddTask}>
+          <DialogTrigger asChild>
             <Button
-              variant={view === 'month' ? 'default' : 'ghost'}
-              size="sm"
-              onClick={() => setView('month')}
-              className="font-vazir"
+              className="bg-gradient-to-r from-primary via-secondary to-accent hover:from-primary/90 hover:via-secondary/90 hover:to-accent/90 font-vazir"
             >
-              ماهانه
+              <Plus className="h-4 w-4 ml-2" />
+              وظیفه جدید
             </Button>
-            <Button
-              variant={view === 'week' ? 'default' : 'ghost'}
-              size="sm"
-              onClick={() => setView('week')}
-              className="font-vazir"
-            >
-              هفتگی
-            </Button>
-            <Button
-              variant={view === 'day' ? 'default' : 'ghost'}
-              size="sm"
-              onClick={() => setView('day')}
-              className="font-vazir"
-            >
-              روزانه
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle className="font-vazir text-lg">ایجاد وظیفه جدید</DialogTitle>
+              <DialogDescription className="font-vazir text-sm text-muted-foreground">
+                مشخصات وظیفه جدید را وارد کنید
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 mt-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium font-vazir">عنوان وظیفه</label>
+                <Input
+                  placeholder="عنوان وظیفه را وارد کنید"
+                  value={newTask.title}
+                  onChange={(e) => setNewTask({ ...newTask, title: e.target.value })}
+                  className="font-vazir"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium font-vazir">توضیحات</label>
+                <Textarea
+                  placeholder="توضیحات وظیفه را وارد کنید"
+                  value={newTask.description}
+                  onChange={(e) => setNewTask({ ...newTask, description: e.target.value })}
+                  className="font-vazir"
+                  rows={3}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium font-vazir">اولویت</label>
+                  <Select
+                    value={newTask.priority}
+                    onValueChange={(value) => setNewTask({ ...newTask, priority: value })}
+                  >
+                    <SelectTrigger className="font-vazir">
+                      <SelectValue placeholder="انتخاب اولویت" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="high" className="font-vazir">ضروری</SelectItem>
+                      <SelectItem value="medium" className="font-vazir">متوسط</SelectItem>
+                      <SelectItem value="low" className="font-vazir">عادی</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium font-vazir">تاریخ سررسید</label>
+                  <Input
+                    type="date"
+                    value={newTask.dueDate}
+                    onChange={(e) => setNewTask({ ...newTask, dueDate: e.target.value })}
+                    className="font-vazir"
+                    min={new Date().toISOString().split('T')[0]}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium font-vazir">محول به</label>
+                <Select
+                  value={newTask.assigneeId}
+                  onValueChange={(value) => setNewTask({ ...newTask, assigneeId: value })}
+                >
+                  <SelectTrigger className="font-vazir">
+                    <SelectValue placeholder="انتخاب همکار" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {mockUsers.map(user => (
+                      <SelectItem key={user.id} value={user.id} className="font-vazir">
+                        <div className="flex items-center space-x-2 space-x-reverse">
+                          <Avatar className="h-6 w-6">
+                            <AvatarFallback className="font-vazir bg-primary/10 text-primary text-xs">
+                              {user.name.split(' ').map(n => n[0]).join('')}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="flex flex-col">
+                            <span className="text-sm">{user.name}</span>
+                            <span className="text-xs text-muted-foreground">{user.role}</span>
+                          </div>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="flex justify-end space-x-2 space-x-reverse mt-6">
+                <Button
+                  variant="outline"
+                  onClick={() => setShowAddTask(false)}
+                  className="font-vazir"
+                >
+                  انصراف
+                </Button>
+                <Button
+                  onClick={handleAddTask}
+                  disabled={!newTask.title || !newTask.assigneeId || !newTask.dueDate}
+                  className="font-vazir bg-primary text-primary-foreground hover:bg-primary/90"
+                >
+                  ایجاد وظیفه
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
+
+      {/* آمار سریع */}
+      <div className="grid gap-4 md:grid-cols-4">
+        <Card className="border-primary/20 hover:border-primary/40 transition-all duration-300">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium font-vazir">کل وظایف</CardTitle>
+            <CheckCircle2 className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold font-vazir">{tasks.length.toLocaleString('fa-IR')}</div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-yellow-200 hover:border-yellow-400 transition-all duration-300">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium font-vazir">در حال انجام</CardTitle>
+            <Clock className="h-4 w-4 text-yellow-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-yellow-600 font-vazir">
+              {tasks.filter(t => !t.completed && t.status === 'in_progress').length.toLocaleString('fa-IR')}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-red-200 hover:border-red-400 transition-all duration-300">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium font-vazir">ضروری</CardTitle>
+            <AlertCircle className="h-4 w-4 text-red-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-red-600 font-vazir">
+              {tasks.filter(t => t.priority === 'high' && !t.completed).length.toLocaleString('fa-IR')}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-green-200 hover:border-green-400 transition-all duration-300">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium font-vazir">تکمیل شده</CardTitle>
+            <CheckCircle2 className="h-4 w-4 text-green-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-green-600 font-vazir">
+              {tasks.filter(t => t.completed).length.toLocaleString('fa-IR')}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* لیست وظایف */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center space-x-2 space-x-reverse font-vazir">
+              <CheckCircle2 className="h-5 w-5" />
+              <span>لیست وظایف</span>
+            </CardTitle>
+            <Button variant="outline" size="sm" className="font-vazir">
+              <Filter className="h-4 w-4 ml-2" />
+              فیلتر
             </Button>
           </div>
-          <Button className="bg-gradient-to-r from-primary via-secondary to-accent hover:from-primary/90 hover:via-secondary/90 hover:to-accent/90 font-vazir">
-            <Plus className="h-4 w-4 ml-2" />
-            رویداد جدید
-          </Button>
-        </div>
-      </div>
-
-      <div className="grid gap-6 lg:grid-cols-4">
-        {/* تقویم اصلی */}
-        <div className="lg:col-span-3">
-          <Card className="border-border/50 hover:border-primary/30 transition-all duration-300">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle className="flex items-center space-x-2 space-x-reverse font-vazir">
-                  <Calendar className="h-5 w-5" />
-                  <span>{getCurrentPersianMonth()} {getCurrentPersianYear()}</span>
-                </CardTitle>
-                <div className="flex items-center space-x-2 space-x-reverse">
-                  <Button variant="outline" size="sm" onClick={() => navigateMonth('prev')}>
-                    <ChevronRight className="h-4 w-4" />
-                  </Button>
-                  <Button variant="outline" size="sm" onClick={() => setCurrentDate(new Date())} className="font-vazir">
-                    امروز
-                  </Button>
-                  <Button variant="outline" size="sm" onClick={() => navigateMonth('next')}>
-                    <ChevronLeft className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              {view === 'month' && renderMonthView()}
-              {view === 'week' && (
-                <div className="text-center py-8 text-muted-foreground font-vazir">
-                  نمای هفتگی در حال توسعه است
-                </div>
-              )}
-              {view === 'day' && (
-                <div className="text-center py-8 text-muted-foreground font-vazir">
-                  نمای روزانه در حال توسعه است
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* سایدبار */}
-        <div className="space-y-6">
-          {renderTodayEvents()}
-
-          {/* رویدادهای آینده */}
-          <Card className="border-border/50 hover:border-secondary/30 transition-all duration-300">
-            <CardHeader>
-              <CardTitle className="font-vazir">رویدادهای آینده</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {mockCalendarEvents
-                  .filter(event => new Date(event.startDate) > new Date())
-                  .slice(0, 5)
-                  .map(event => (
-                    <div key={event.id} className="flex items-center space-x-3 space-x-reverse p-2 border border-border/50 rounded-lg hover:border-secondary/30 transition-all duration-300">
-                      <div className={`p-1 rounded-full ${
-                        event.type === 'meeting' ? 'bg-primary/10 text-primary' :
-                        event.type === 'call' ? 'bg-secondary/10 text-secondary' : 'bg-accent/10 text-accent'
-                      }`}>
-                        {event.type === 'meeting' ? <Users className="h-3 w-3" /> : <Phone className="h-3 w-3" />}
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-sm font-medium font-vazir">{event.title}</p>
-                        <p className="text-xs text-muted-foreground font-vazir">
-                          {new Date(event.startDate).toLocaleDateString('fa-IR')}
-                        </p>
-                      </div>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {tasks.map(task => (
+              <div
+                key={task.id}
+                className={`flex items-start space-x-4 space-x-reverse p-4 border rounded-lg transition-all duration-300 ${task.completed
+                  ? 'border-green-200 bg-green-50/50 dark:border-green-900 dark:bg-green-900/20'
+                  : 'border-border/50 hover:border-primary/30'
+                  }`}
+              >
+                <Checkbox
+                  checked={task.completed}
+                  onCheckedChange={() => toggleTaskCompletion(task.id)}
+                  className="mt-1"
+                />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <h4 className={`font-medium font-vazir ${task.completed ? 'line-through text-muted-foreground' : ''}`}>
+                        {task.title}
+                      </h4>
+                      <p className={`text-sm text-muted-foreground font-vazir mt-1 ${task.completed ? 'line-through' : ''}`}>
+                        {task.description}
+                      </p>
                     </div>
-                  ))}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* آمار سریع */}
-          <Card className="border-border/50 hover:border-accent/30 transition-all duration-300">
-            <CardHeader>
-              <CardTitle className="font-vazir">آمار این ماه</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-vazir">جلسات</span>
-                  <span className="font-bold font-vazir">
-                    {mockCalendarEvents.filter(e => e.type === 'meeting').length.toLocaleString('fa-IR')}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-vazir">تماس‌ها</span>
-                  <span className="font-bold font-vazir">
-                    {mockCalendarEvents.filter(e => e.type === 'call').length.toLocaleString('fa-IR')}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-vazir">تسک‌ها</span>
-                  <span className="font-bold font-vazir">
-                    {mockTasks.length.toLocaleString('fa-IR')}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-vazir">تکمیل شده</span>
-                  <span className="font-bold text-green-600 font-vazir">
-                    {mockTasks.filter(t => t.status === 'completed').length.toLocaleString('fa-IR')}
-                  </span>
+                    <Badge variant="outline" className={`${getPriorityColor(task.priority)} font-vazir`}>
+                      {getPriorityLabel(task.priority)}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center space-x-4 space-x-reverse mt-4">
+                    <div className="flex items-center space-x-2 space-x-reverse">
+                      <Avatar className="h-6 w-6">
+                        <AvatarFallback className="font-vazir bg-primary/10 text-primary text-xs">
+                          {task.assignee.name.split(' ').map(n => n[0]).join('')}
+                        </AvatarFallback>
+                      </Avatar>
+                      <span className="text-sm text-muted-foreground font-vazir">
+                        {task.assignee.name}
+                      </span>
+                    </div>
+                    <div className="flex items-center text-muted-foreground">
+                      <Calendar className="h-4 w-4 ml-1" />
+                      <span className="text-sm font-vazir">
+                        {new Date(task.dueDate).toLocaleDateString('fa-IR')}
+                      </span>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

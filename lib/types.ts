@@ -1,3 +1,34 @@
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  status: 'online' | 'offline' | 'away';
+  avatar?: string;
+}
+
+export interface Contact extends Omit<User, 'status'> {
+  status?: 'online' | 'offline' | 'away';
+}
+
+export interface Message {
+  id: string;
+  content: string;
+  senderId: string;
+  receiverId: string;
+  timestamp: Date;
+  status?: 'sent' | 'delivered' | 'read';
+}
+
+export interface ChatThread {
+  id: string;
+  participants: string[];
+  lastMessage?: Message;
+  unreadCount?: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export interface Customer {
   id: string;
   name: string;
@@ -152,17 +183,6 @@ export interface DealProduct {
   totalPrice: number;
 }
 
-export interface Contact {
-  id: string;
-  customerId: string;
-  name: string;
-  email: string;
-  phone: string;
-  role: string;
-  notes?: string;
-  createdAt: string;
-}
-
 export interface Ticket {
   id: string;
   customerId: string;
@@ -212,18 +232,6 @@ export interface Feedback {
   comment?: string;
   createdAt: string;
   category: string;
-}
-
-export interface User {
-  id: string;
-  name: string;
-  email: string;
-  role: 'admin' | 'agent' | 'manager';
-  avatar?: string;
-  lastActive: string;
-  status: 'active' | 'inactive';
-  team?: string;
-  targets?: Target[];
 }
 
 export interface DashboardStats {

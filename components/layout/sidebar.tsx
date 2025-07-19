@@ -37,61 +37,86 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
+  // ————— CRM Core ————— 
   {
     title: 'داشبورد',
     href: '/dashboard',
     icon: LayoutDashboard,
   },
   {
-    title: 'مشتریان',
-    href: '/dashboard/customers',
+    title: 'مشتریان & مخاطبین',
+    href: '#',
     icon: Users,
     children: [
-      { title: 'همه مشتریان', href: '/dashboard/customers', icon: Users },
-      { title: 'افزودن مشتری', href: '/dashboard/customers/new', icon: Users },
+      { title: 'مشتریان', href: '/dashboard/customers', icon: Users },
+      { title: 'مخاطبین', href: '/dashboard/contacts', icon: Contact },
     ],
   },
   {
-    title: 'مخاطبین',
-    href: '/dashboard/contacts',
-    icon: Contact,
-  },
-  {
-    title: 'فعالیت‌ها',
-    href: '/dashboard/activities',
+    title: 'همکاران & فعالیت‌ها',
+    href: '#',
     icon: Activity,
-    badge: '۱۲',
-  },
-  {
-    title: 'پشتیبانی',
-    href: '/dashboard/tickets',
-    icon: Ticket,
-    badge: '۲۳',
     children: [
-      { title: 'همه تیکت‌ها', href: '/dashboard/tickets', icon: Ticket },
-      { title: 'تیکت‌های باز', href: '/dashboard/tickets?status=open', icon: Ticket },
-      { title: 'تیکت‌های من', href: '/dashboard/tickets?assigned=me', icon: Ticket },
+      { title: 'همکاران', href: '/dashboard/coworkers', icon: Target },
+      { title: 'فعالیت‌ها', href: '/dashboard/activities', icon: Activity },
     ],
   },
   {
     title: 'تعاملات',
     href: '/dashboard/interactions',
     icon: MessageCircle,
-  },
-  {
-    title: 'فروش',
-    href: '/dashboard/sales',
-    icon: TrendingUp,
     children: [
-      { title: 'پایپ‌لاین', href: '/dashboard/sales', icon: TrendingUp },
-      { title: 'فرصت‌ها', href: '/dashboard/sales/opportunities', icon: Target },
+      { title: 'لیست تعاملات', href: '/dashboard/interactions', icon: Activity },
+      { title: 'چت', href: '/dashboard/interactions/chat', icon: MessageCircle },
     ],
   },
+  {
+    title: 'مدیریت فروش',
+    href: '#',
+    icon: TrendingUp,
+    children: [
+      { title: 'فرصت‌های فروش', href: '/dashboard/sales/opportunities', icon: Ticket },
+      { title: 'ثبت فروش', href: '/dashboard/sales', icon: TrendingUp },
+    ],
+  },
+
+  // ————— CEM (تجربه مشتری) ————— 
+  //{
+  //title: 'CEM Overview',
+  //href: '/dashboard/cem/overview',
+  //icon: BarChart3,
+  // },
+  {
+    title: 'بازخورد & امتیازدهی',
+    href: '#',
+    icon: MessageCircle,
+    children: [
+      { title: 'ثبت بازخورد', href: '/dashboard/feedback/new', icon: MessageCircle },
+      { title: 'بازخوردها', href: '/dashboard/feedback', icon: MessageCircle },
+      { title: 'نظرسنجی‌ها', href: '/dashboard/surveys', icon: ChevronRight },
+      { title: 'CSAT', href: '/dashboard/csat', icon: ChevronRight },
+      { title: 'NPS', href: '/dashboard/nps', icon: ChevronRight },
+    ],
+  },
+  {
+    title: 'تحلیل & بینش',
+    href: '#',
+    icon: BarChart3,
+    children: [
+      { title: 'تحلیل احساسات', href: '/dashboard/emotions', icon: Activity },
+      { title: 'بینش‌های خودکار', href: '/dashboard/insights', icon: BarChart3 },
+      { title: 'نقاط تماس', href: '/dashboard/touchpoints', icon: Target },
+      { title: 'سلامت مشتری', href: '/dashboard/customer-health', icon: Activity },
+      { title: 'هشدارها', href: '/dashboard/alerts', icon: Activity },
+      { title: 'صدای مشتری (VOC)', href: '/dashboard/voice-of-customer', icon: MessageCircle },
+    ],
+  },
+
+  // ————— سایر ————— 
   {
     title: 'پروژه‌ها',
     href: '/dashboard/projects',
     icon: Briefcase,
-    badge: '۵',
   },
   {
     title: 'تقویم',
@@ -107,6 +132,10 @@ const navItems: NavItem[] = [
     title: 'تنظیمات',
     href: '/dashboard/settings',
     icon: Settings,
+    children: [
+      { title: 'تنظیمات عمومی', href: '/dashboard/settings', icon: Settings },
+      { title: 'تنظیمات CEM', href: '/dashboard/cem-settings', icon: Settings },
+    ],
   },
 ];
 
@@ -116,11 +145,14 @@ export function Sidebar() {
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
 
   const toggleExpanded = (title: string) => {
-    setExpandedItems(prev => 
-      prev.includes(title) 
-        ? prev.filter(item => item !== title)
-        : [...prev, title]
-    );
+    setExpandedItems(prev => {
+      // اگر آیتم در لیست باز شده‌ها باشد، آن را ببند
+      if (prev.includes(title)) {
+        return prev.filter(item => item !== title);
+      }
+      // در غیر این صورت، همه را ببند و فقط این یکی را باز کن
+      return [title];
+    });
   };
 
   const renderNavItem = (item: NavItem, level = 0) => {
@@ -189,7 +221,7 @@ export function Sidebar() {
             </Link>
           )}
         </div>
-        
+
         {hasChildren && isExpanded && !sidebarCollapsed && (
           <div className="mr-4 space-y-1 animate-slide-in-right">
             {item.children?.map(child => renderNavItem(child, level + 1))}
@@ -203,12 +235,12 @@ export function Sidebar() {
     <>
       {/* Mobile overlay */}
       {!sidebarCollapsed && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/50 lg:hidden z-40 backdrop-blur-sm"
           onClick={() => setSidebarCollapsed(true)}
         />
       )}
-      
+
       {/* Sidebar */}
       <div
         className={cn(
@@ -236,7 +268,7 @@ export function Sidebar() {
             {sidebarCollapsed ? <Menu className="h-4 w-4" /> : <X className="h-4 w-4" />}
           </Button>
         </div>
-        
+
         <nav className="space-y-2 p-4 overflow-y-auto h-[calc(100vh-4rem)]">
           {navItems.map(item => renderNavItem(item))}
         </nav>

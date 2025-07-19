@@ -1,11 +1,11 @@
-import { 
-  Customer, 
-  Contact, 
-  Ticket, 
-  Interaction, 
-  Opportunity, 
-  Feedback, 
-  User, 
+import {
+  Customer,
+  Contact,
+  Ticket,
+  Interaction,
+  Opportunity,
+  Feedback,
+  User,
   DashboardStats,
   Activity,
   Note,
@@ -23,42 +23,58 @@ export const mockUsers: User[] = [
     id: '1',
     name: 'علی جعفری',
     email: 'ali.jafari@company.com',
-    role: 'admin',
-    avatar: 'ع.ج',
-    lastActive: '2024-01-20T16:00:00Z',
-    status: 'active',
-    team: 'مدیریت',
+    role: 'مدیر',
+    status: 'online',
   },
   {
     id: '2',
-    name: 'مریم احمدی',
-    email: 'maryam.ahmadi@company.com',
-    role: 'agent',
-    avatar: 'م.ا',
-    lastActive: '2024-01-20T15:30:00Z',
-    status: 'active',
-    team: 'فروش',
+    name: 'مهندس کریمی',
+    email: '1@gmail.com',
+    password: '1',
+    role: 'کارشناس فروش',
+    status: 'online',
   },
   {
     id: '3',
     name: 'حسن محمدی',
     email: 'hassan.mohammadi@company.com',
-    role: 'manager',
-    avatar: 'ح.م',
-    lastActive: '2024-01-20T14:45:00Z',
-    status: 'active',
-    team: 'پشتیبانی',
+    role: 'مدیر فروش',
+    status: 'away',
   },
   {
     id: '4',
-    name: 'زهرا کریمی',
+    name: 'رسول کریمیی',
     email: 'zahra.karimi@company.com',
     role: 'agent',
-    avatar: 'ز.ک',
+    avatar: 'ر.ک',
     lastActive: '2024-01-20T13:20:00Z',
     status: 'active',
     team: 'فروش',
   },
+];
+
+export const mockContacts: Contact[] = [
+  {
+    id: '4',
+    name: 'زهرا حسینی',
+    email: 'zahra.hosseini@gmail.com',
+    role: 'مشتری',
+    status: 'online',
+  },
+  {
+    id: '5',
+    name: 'محمد رضایی',
+    email: 'mohammad.rezaei@yahoo.com',
+    role: 'مشتری',
+    status: 'offline',
+  },
+  {
+    id: '6',
+    name: 'فاطمه کریمی',
+    email: 'fatemeh.karimi@gmail.com',
+    role: 'مشتری',
+    status: 'away',
+  }
 ];
 
 export const mockTargets: Target[] = [
@@ -392,29 +408,6 @@ export const mockCustomers: Customer[] = [
       activities: [],
       notes: [],
     },
-  },
-];
-
-export const mockContacts: Contact[] = [
-  {
-    id: '1',
-    customerId: '1',
-    name: 'احمد محمدی',
-    email: 'ahmad.mohammadi@acme.com',
-    phone: '۰۹۱۲۳۴۵۶۷۸۹',
-    role: 'مدیر فناوری اطلاعات',
-    notes: 'مخاطب اصلی فنی',
-    createdAt: '2024-01-15T10:00:00Z',
-  },
-  {
-    id: '2',
-    customerId: '1',
-    name: 'سارا احمدی',
-    email: 'sara.ahmadi@acme.com',
-    phone: '۰۹۱۲۳۴۵۶۷۸۰',
-    role: 'مدیرعامل',
-    notes: 'تصمیم‌گیرنده اصلی',
-    createdAt: '2024-01-15T10:00:00Z',
   },
 ];
 

@@ -47,7 +47,7 @@ export default function DashboardPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold font-vazir bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
-            داشبورد مدیریت
+            داشبورد مدیریت رابین
           </h1>
           <p className="text-muted-foreground font-vazir mt-2">
             خوش آمدید {currentUser.name} - نمای کلی از عملکرد و فعالیت‌های امروز
