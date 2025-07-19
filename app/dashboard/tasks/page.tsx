@@ -34,9 +34,10 @@ import {
   Filter,
   Users,
 } from 'lucide-react';
+import { mockTasks, mockCustomers, mockUsers } from '@/lib/mock-data';
 
-// نمونه داده برای کاربران
-const mockUsers = [
+// بقیه نمونه داده‌ها که در mock-data نیست
+const mockUsersLocal = [
   {
     id: '1',
     name: 'علی محمدی',
@@ -67,51 +68,16 @@ const mockUsers = [
   },
 ];
 
-// نمونه داده برای وظایف
-const mockTasks = [
-  {
-    id: '1',
-    title: 'تماس با مشتری جدید',
-    description: 'پیگیری درخواست همکاری و ارسال پیش‌فاکتور',
-    status: 'pending',
-    priority: 'high',
-    dueDate: '2025-07-20',
-    assignee: {
-      name: 'علی محمدی',
-      avatar: null,
-      email: 'ali@example.com',
-    },
-    completed: false,
-  },
-  {
-    id: '2',
-    title: 'بررسی گزارش ماهانه',
-    description: 'تحلیل عملکرد تیم فروش و تهیه گزارش برای مدیریت',
-    status: 'in_progress',
-    priority: 'medium',
-    dueDate: '2025-07-18',
-    assignee: {
-      name: 'سارا احمدی',
-      avatar: null,
-      email: 'sara@example.com',
-    },
-    completed: false,
-  },
-  {
-    id: '3',
-    title: 'به‌روزرسانی وب‌سایت',
-    description: 'اضافه کردن محصولات جدید و به‌روزرسانی قیمت‌ها',
-    status: 'completed',
-    priority: 'low',
-    dueDate: '2025-07-15',
-    assignee: {
-      name: 'رضا کریمی',
-      avatar: null,
-      email: 'reza@example.com',
-    },
-    completed: true,
-  },
-];
+// Helper function تا نام کاربر را از ID بگیریم
+const getUserName = (userId: string) => {
+  const user = mockUsers.find(u => u.id === userId);
+  return user ? user.name : 'نامشخص';
+};
+
+const getCustomerName = (customerId: string) => {
+  const customer = mockCustomers.find(c => c.id === customerId);
+  return customer ? customer.name : 'مشتری نامشخص';
+};
 
 export default function TasksPage() {
   const [tasks, setTasks] = useState(mockTasks);
@@ -119,32 +85,43 @@ export default function TasksPage() {
   const [newTask, setNewTask] = useState({
     title: '',
     description: '',
-    assigneeId: '',
+    assignedTo: '',
     priority: 'medium',
     dueDate: '',
   });
 
   const toggleTaskCompletion = (taskId: string) => {
-    setTasks(tasks.map(task =>
-      task.id === taskId ? { ...task, completed: !task.completed } : task
-    ));
+    setTasks(tasks.map(task => {
+      if (task.id === taskId) {
+        return {
+          ...task,
+          status: task.status === 'completed' ? 'pending' : 'completed'
+        };
+      }
+      return task;
+    }));
   };
 
   const handleAddTask = () => {
-    const assignee = mockUsers.find(user => user.id === newTask.assigneeId);
     const task = {
       id: (tasks.length + 1).toString(),
-      ...newTask,
-      status: 'pending',
-      completed: false,
-      assignee: assignee || mockUsers[0],
+      title: newTask.title,
+      description: newTask.description,
+      assignedTo: newTask.assignedTo,
+      assignedBy: mockUsers[0].id, // فرض: کاربر اول ایجاد کننده است
+      customerId: mockCustomers[0].id, // پیش‌فرض
+      priority: newTask.priority as 'low' | 'medium' | 'high',
+      status: 'pending' as 'pending' | 'in_progress' | 'completed' | 'cancelled',
+      dueDate: newTask.dueDate,
+      createdAt: new Date().toISOString(),
+      category: 'other' as 'call' | 'meeting' | 'follow_up' | 'proposal' | 'admin' | 'other'
     };
     setTasks([task, ...tasks]);
     setShowAddTask(false);
     setNewTask({
       title: '',
       description: '',
-      assigneeId: '',
+      assignedTo: '',
       priority: 'medium',
       dueDate: '',
     });
@@ -249,8 +226,8 @@ export default function TasksPage() {
               <div className="space-y-2">
                 <label className="text-sm font-medium font-vazir">محول به</label>
                 <Select
-                  value={newTask.assigneeId}
-                  onValueChange={(value) => setNewTask({ ...newTask, assigneeId: value })}
+                  value={newTask.assignedTo}
+                  onValueChange={(value) => setNewTask({ ...newTask, assignedTo: value })}
                 >
                   <SelectTrigger className="font-vazir">
                     <SelectValue placeholder="انتخاب همکار" />
@@ -285,7 +262,7 @@ export default function TasksPage() {
                 </Button>
                 <Button
                   onClick={handleAddTask}
-                  disabled={!newTask.title || !newTask.assigneeId || !newTask.dueDate}
+                  disabled={!newTask.title || !newTask.assignedTo || !newTask.dueDate}
                   className="font-vazir bg-primary text-primary-foreground hover:bg-primary/90"
                 >
                   ایجاد وظیفه
@@ -392,11 +369,11 @@ export default function TasksPage() {
                     <div className="flex items-center space-x-2 space-x-reverse">
                       <Avatar className="h-6 w-6">
                         <AvatarFallback className="font-vazir bg-primary/10 text-primary text-xs">
-                          {task.assignee.name.split(' ').map(n => n[0]).join('')}
+                          {getUserName(task.assignedTo).split(' ').map((n: string) => n[0]).join('')}
                         </AvatarFallback>
                       </Avatar>
                       <span className="text-sm text-muted-foreground font-vazir">
-                        {task.assignee.name}
+                        {getUserName(task.assignedTo)}
                       </span>
                     </div>
                     <div className="flex items-center text-muted-foreground">
@@ -404,6 +381,9 @@ export default function TasksPage() {
                       <span className="text-sm font-vazir">
                         {new Date(task.dueDate).toLocaleDateString('fa-IR')}
                       </span>
+                    </div>
+                    <div className="text-sm text-muted-foreground font-vazir">
+                      {getCustomerName(task.customerId)}
                     </div>
                   </div>
                 </div>

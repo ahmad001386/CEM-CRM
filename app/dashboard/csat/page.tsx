@@ -2,56 +2,13 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import './csat.css';
+import { mockCSATData } from '@/lib/mock-data';
 
 type Distribution = {
     [key in 1 | 2 | 3 | 4 | 5]: number;
 };
 
 type ScoreType = 1 | 2 | 3 | 4 | 5;
-
-const mockData = {
-    overview: {
-        current: 4.2,
-        previous: 4.0,
-        target: 4.5,
-        responses: 342,
-        distribution: {
-            5: 145,
-            4: 120,
-            3: 50,
-            2: 20,
-            1: 7
-        } as Distribution
-    },
-    byChannel: [
-        { channel: 'ایمیل', score: 4.3, responses: 150 },
-        { channel: 'تلفن', score: 4.1, responses: 120 },
-        { channel: 'چت', score: 4.0, responses: 72 }
-    ],
-    byDepartment: [
-        { department: 'پشتیبانی', score: 4.4, responses: 200 },
-        { department: 'فروش', score: 4.1, responses: 80 },
-        { department: 'فنی', score: 3.9, responses: 62 }
-    ],
-    recentResponses: [
-        {
-            id: 1,
-            customer: 'شرکت الف',
-            score: 5,
-            comment: 'پشتیبانی عالی و سریع',
-            date: '1402/04/15',
-            channel: 'ایمیل'
-        },
-        {
-            id: 2,
-            customer: 'شرکت ب',
-            score: 3,
-            comment: 'زمان پاسخگویی طولانی بود',
-            date: '1402/04/14',
-            channel: 'تلفن'
-        }
-    ]
-};
 
 export default function CSATPage() {
     return (
@@ -69,27 +26,27 @@ export default function CSATPage() {
                 <Card className="p-4">
                     <h3 className="text-sm font-medium text-muted-foreground mb-2">CSAT فعلی</h3>
                     <div className="flex items-baseline gap-2">
-                        <p className="text-3xl font-bold">{mockData.overview.current}</p>
-                        <span className="text-sm text-green-600">+{((mockData.overview.current - mockData.overview.previous) * 100).toFixed(1)}%</span>
+                        <p className="text-3xl font-bold">{mockCSATData.overview.current}</p>
+                        <span className="text-sm text-green-600">+{((mockCSATData.overview.current - mockCSATData.overview.previous) * 100).toFixed(1)}%</span>
                     </div>
-                    <p className="text-sm text-muted-foreground mt-1">هدف: {mockData.overview.target}</p>
+                    <p className="text-sm text-muted-foreground mt-1">هدف: {mockCSATData.overview.target}</p>
                 </Card>
                 <Card className="p-4">
                     <h3 className="text-sm font-medium text-muted-foreground mb-2">تعداد پاسخ‌ها</h3>
-                    <p className="text-3xl font-bold">{mockData.overview.responses}</p>
+                    <p className="text-3xl font-bold">{mockCSATData.overview.responses}</p>
                 </Card>
                 <Card className="p-4">
                     <h3 className="text-sm font-medium text-muted-foreground mb-2">بهترین کانال</h3>
-                    <p className="text-3xl font-bold">{Math.max(...mockData.byChannel.map(c => c.score))}</p>
+                    <p className="text-3xl font-bold">{Math.max(...mockCSATData.byChannel.map(c => c.score))}</p>
                     <p className="text-sm text-muted-foreground mt-1">
-                        {mockData.byChannel.find(c => c.score === Math.max(...mockData.byChannel.map(c => c.score)))?.channel}
+                        {mockCSATData.byChannel.find(c => c.score === Math.max(...mockCSATData.byChannel.map(c => c.score)))?.channel}
                     </p>
                 </Card>
                 <Card className="p-4">
                     <h3 className="text-sm font-medium text-muted-foreground mb-2">بهترین دپارتمان</h3>
-                    <p className="text-3xl font-bold">{Math.max(...mockData.byDepartment.map(d => d.score))}</p>
+                    <p className="text-3xl font-bold">{Math.max(...mockCSATData.byDepartment.map(d => d.score))}</p>
                     <p className="text-sm text-muted-foreground mt-1">
-                        {mockData.byDepartment.find(d => d.score === Math.max(...mockData.byDepartment.map(d => d.score)))?.department}
+                        {mockCSATData.byDepartment.find(d => d.score === Math.max(...mockCSATData.byDepartment.map(d => d.score)))?.department}
                     </p>
                 </Card>
             </div>
@@ -99,8 +56,8 @@ export default function CSATPage() {
                 <h2 className="text-lg font-medium mb-4">توزیع امتیازات</h2>
                 <div className="space-y-2">
                     {([5, 4, 3, 2, 1] as const).map(score => {
-                        const distributionValue = mockData.overview.distribution[score];
-                        const percentage = (distributionValue / mockData.overview.responses) * 100;
+                        const distributionValue = mockCSATData.overview.distribution[score];
+                        const percentage = (distributionValue / mockCSATData.overview.responses) * 100;
 
                         return (
                             <div key={score} className="flex items-center gap-4">
@@ -126,7 +83,7 @@ export default function CSATPage() {
                 <Card className="p-6">
                     <h2 className="text-lg font-medium mb-4">CSAT بر اساس کانال</h2>
                     <div className="space-y-4">
-                        {mockData.byChannel.map(item => (
+                        {mockCSATData.byChannel.map(item => (
                             <div key={item.channel} className="flex items-center justify-between">
                                 <div>
                                     <p className="font-medium">{item.channel}</p>
@@ -140,7 +97,7 @@ export default function CSATPage() {
                 <Card className="p-6">
                     <h2 className="text-lg font-medium mb-4">CSAT بر اساس دپارتمان</h2>
                     <div className="space-y-4">
-                        {mockData.byDepartment.map(item => (
+                        {mockCSATData.byDepartment.map(item => (
                             <div key={item.department} className="flex items-center justify-between">
                                 <div>
                                     <p className="font-medium">{item.department}</p>
@@ -157,7 +114,7 @@ export default function CSATPage() {
             <Card className="p-6">
                 <h2 className="text-lg font-medium mb-4">پاسخ‌های اخیر</h2>
                 <div className="space-y-4">
-                    {mockData.recentResponses.map(response => (
+                    {mockCSATData.recentResponses.map(response => (
                         <Card key={response.id} className="p-4">
                             <div className="flex items-start justify-between mb-2">
                                 <div>

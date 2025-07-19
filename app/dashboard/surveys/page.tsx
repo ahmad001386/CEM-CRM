@@ -13,49 +13,14 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import Link from 'next/link';
-
-interface Survey {
-    id: string;
-    title: string;
-    type: string;
-    status: 'active' | 'draft' | 'completed';
-    responses: number;
-    created: string;
-}
-
-const mockSurveys: Survey[] = [
-    {
-        id: '1',
-        title: 'نظرسنجی رضایت مشتری - بهار 1402',
-        type: 'CSAT',
-        status: 'active',
-        responses: 245,
-        created: '1402/01/15',
-    },
-    {
-        id: '2',
-        title: 'نظرسنجی محصول جدید',
-        type: 'Product',
-        status: 'draft',
-        responses: 0,
-        created: '1402/01/14',
-    },
-    {
-        id: '3',
-        title: 'نظرسنجی رضایت کارکنان',
-        type: 'Employee',
-        status: 'completed',
-        responses: 89,
-        created: '1402/01/10',
-    },
-];
+import { mockSurveysData } from '@/lib/mock-data';
 
 export default function SurveysPage() {
     const [searchQuery, setSearchQuery] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
     const [typeFilter, setTypeFilter] = useState('all');
 
-    const filteredSurveys = mockSurveys.filter(survey => {
+    const filteredSurveys = mockSurveysData.filter(survey => {
         const matchesSearch = survey.title.toLowerCase().includes(searchQuery.toLowerCase());
         const matchesStatus = statusFilter === 'all' || survey.status === statusFilter;
         const matchesType = typeFilter === 'all' || survey.type === typeFilter;

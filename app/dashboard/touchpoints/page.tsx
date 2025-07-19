@@ -1,53 +1,7 @@
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-
-const mockData = {
-    summary: {
-        total: 248,
-        byChannel: {
-            email: 89,
-            phone: 76,
-            chat: 45,
-            inPerson: 38
-        }
-    },
-    touchpoints: [
-        {
-            id: 1,
-            customerName: 'شرکت الف',
-            type: 'support',
-            channel: 'email',
-            date: '1402/04/15',
-            score: 4.5,
-            agent: 'علی محمدی',
-            description: 'درخواست راهنمایی برای نصب نسخه جدید',
-            status: 'completed'
-        },
-        {
-            id: 2,
-            customerName: 'شرکت ب',
-            type: 'sales',
-            channel: 'phone',
-            date: '1402/04/14',
-            score: 4.0,
-            agent: 'مریم احمدی',
-            description: 'جلسه معرفی محصول جدید',
-            status: 'scheduled'
-        },
-        {
-            id: 3,
-            customerName: 'شرکت ج',
-            type: 'feedback',
-            channel: 'chat',
-            date: '1402/04/14',
-            score: 3.5,
-            agent: 'رضا کریمی',
-            description: 'دریافت بازخورد در مورد ویژگی جدید',
-            status: 'in_progress'
-        }
-    ]
-};
+import { mockTouchpointsData } from '@/lib/mock-data';
 
 const channelColors = {
     email: 'bg-blue-50 text-blue-600',
@@ -83,19 +37,19 @@ export default function TouchpointsPage() {
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
                 <Card className="p-4">
                     <h3 className="text-sm font-medium text-muted-foreground mb-2">کل تعاملات</h3>
-                    <p className="text-3xl font-bold">{mockData.summary.total}</p>
+                    <p className="text-3xl font-bold">{mockTouchpointsData.summary.total}</p>
                 </Card>
                 <Card className="p-4">
                     <h3 className="text-sm font-medium text-muted-foreground mb-2">ایمیل</h3>
-                    <p className="text-3xl font-bold text-blue-600">{mockData.summary.byChannel.email}</p>
+                    <p className="text-3xl font-bold text-blue-600">{mockTouchpointsData.summary.byChannel.email}</p>
                 </Card>
                 <Card className="p-4">
                     <h3 className="text-sm font-medium text-muted-foreground mb-2">تلفن</h3>
-                    <p className="text-3xl font-bold text-green-600">{mockData.summary.byChannel.phone}</p>
+                    <p className="text-3xl font-bold text-green-600">{mockTouchpointsData.summary.byChannel.phone}</p>
                 </Card>
                 <Card className="p-4">
                     <h3 className="text-sm font-medium text-muted-foreground mb-2">چت</h3>
-                    <p className="text-3xl font-bold text-purple-600">{mockData.summary.byChannel.chat}</p>
+                    <p className="text-3xl font-bold text-purple-600">{mockTouchpointsData.summary.byChannel.chat}</p>
                 </Card>
             </div>
 
@@ -134,7 +88,7 @@ export default function TouchpointsPage() {
 
             {/* Touchpoints List */}
             <div className="space-y-4">
-                {mockData.touchpoints.map(touchpoint => (
+                {mockTouchpointsData.touchpoints.map(touchpoint => (
                     <Card key={touchpoint.id} className="p-4">
                         <div className="flex items-start justify-between mb-4">
                             <div className="space-y-1">

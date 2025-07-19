@@ -1,63 +1,7 @@
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-
-const mockData = {
-    overallHealth: {
-        score: 78,
-        trend: '+3',
-        components: {
-            usage: 85,
-            csat: 76,
-            nps: 72,
-            tickets: 80,
-        }
-    },
-    customers: [
-        {
-            id: 1,
-            name: 'شرکت الف',
-            healthScore: 92,
-            status: 'green',
-            lastInteraction: '1402/04/15',
-            segments: ['Enterprise', 'Tech'],
-            metrics: {
-                usage: 95,
-                csat: 90,
-                nps: 85,
-                tickets: 95
-            }
-        },
-        {
-            id: 2,
-            name: 'شرکت ب',
-            healthScore: 65,
-            status: 'yellow',
-            lastInteraction: '1402/04/10',
-            segments: ['SMB', 'Retail'],
-            metrics: {
-                usage: 60,
-                csat: 70,
-                nps: 65,
-                tickets: 65
-            }
-        },
-        {
-            id: 3,
-            name: 'شرکت ج',
-            healthScore: 45,
-            status: 'red',
-            lastInteraction: '1402/04/01',
-            segments: ['SMB', 'Manufacturing'],
-            metrics: {
-                usage: 40,
-                csat: 50,
-                nps: 45,
-                tickets: 45
-            }
-        }
-    ]
-};
+import { mockCustomerHealthData } from '@/lib/mock-data';
 
 const statusColors = {
     green: 'bg-green-50 text-green-600',
@@ -76,28 +20,28 @@ export default function CustomerHealthPage() {
                     <div>
                         <h2 className="text-lg font-medium mb-4">امتیاز کلی سلامت</h2>
                         <div className="flex items-end gap-4">
-                            <div className="text-5xl font-bold text-primary">{mockData.overallHealth.score}</div>
+                            <div className="text-5xl font-bold text-primary">{mockCustomerHealthData.overallHealth.score}</div>
                             <div className="text-green-600 mb-2">
-                                {mockData.overallHealth.trend}↑
+                                {mockCustomerHealthData.overallHealth.trend}↑
                             </div>
                         </div>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                         <Card className="p-4">
                             <h3 className="text-sm font-medium text-muted-foreground mb-2">استفاده از محصول</h3>
-                            <div className="text-2xl font-bold">{mockData.overallHealth.components.usage}%</div>
+                            <div className="text-2xl font-bold">{mockCustomerHealthData.overallHealth.components.usage}%</div>
                         </Card>
                         <Card className="p-4">
                             <h3 className="text-sm font-medium text-muted-foreground mb-2">رضایت (CSAT)</h3>
-                            <div className="text-2xl font-bold">{mockData.overallHealth.components.csat}%</div>
+                            <div className="text-2xl font-bold">{mockCustomerHealthData.overallHealth.components.csat}%</div>
                         </Card>
                         <Card className="p-4">
                             <h3 className="text-sm font-medium text-muted-foreground mb-2">NPS</h3>
-                            <div className="text-2xl font-bold">{mockData.overallHealth.components.nps}</div>
+                            <div className="text-2xl font-bold">{mockCustomerHealthData.overallHealth.components.nps}</div>
                         </Card>
                         <Card className="p-4">
                             <h3 className="text-sm font-medium text-muted-foreground mb-2">تیکت‌های باز</h3>
-                            <div className="text-2xl font-bold">{mockData.overallHealth.components.tickets}%</div>
+                            <div className="text-2xl font-bold">{mockCustomerHealthData.overallHealth.components.tickets}%</div>
                         </Card>
                     </div>
                 </div>
@@ -111,7 +55,7 @@ export default function CustomerHealthPage() {
                 </div>
 
                 <div className="space-y-4">
-                    {mockData.customers.map(customer => (
+                    {mockCustomerHealthData.customers.map(customer => (
                         <Card key={customer.id} className="p-4">
                             <div className="flex items-start justify-between mb-4">
                                 <div>

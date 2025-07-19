@@ -4,8 +4,7 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import {
@@ -26,268 +25,251 @@ import {
 import {
   Plus,
   Clock,
-  CheckCircle2,
-  AlertCircle,
-  User,
-  Calendar,
-  Filter,
+  Calendar as CalendarIcon,
+  MapPin,
   Users,
+  Video
 } from 'lucide-react';
+import { mockCalendarEvents, mockUsers, mockCustomers } from '@/lib/mock-data';
 
-// نمونه داده برای کاربران
-const mockUsers = [
-  {
-    id: '1',
-    name: 'علی محمدی',
-    email: 'ali@example.com',
-    avatar: null,
-    role: 'مدیر فروش',
-  },
-  {
-    id: '2',
-    name: 'سارا احمدی',
-    email: 'sara@example.com',
-    avatar: null,
-    role: 'کارشناس پشتیبانی',
-  },
-  {
-    id: '3',
-    name: 'رضا کریمی',
-    email: 'reza@example.com',
-    avatar: null,
-    role: 'توسعه‌دهنده',
-  },
-  {
-    id: '4',
-    name: 'مریم حسینی',
-    email: 'maryam@example.com',
-    avatar: null,
-    role: 'مدیر محصول',
-  },
-];
-
-// نمونه داده برای وظایف
-const mockTasks = [
-  {
-    id: '1',
-    title: 'تماس با مشتری جدید',
-    description: 'پیگیری درخواست همکاری و ارسال پیش‌فاکتور',
-    status: 'pending',
-    priority: 'high',
-    dueDate: '2025-07-20',
-    assignee: {
-      name: 'علی محمدی',
-      avatar: null,
-      email: 'ali@example.com',
-    },
-    completed: false,
-  },
-  {
-    id: '2',
-    title: 'بررسی گزارش ماهانه',
-    description: 'تحلیل عملکرد تیم فروش و تهیه گزارش برای مدیریت',
-    status: 'in_progress',
-    priority: 'medium',
-    dueDate: '2025-07-18',
-    assignee: {
-      name: 'سارا احمدی',
-      avatar: null,
-      email: 'sara@example.com',
-    },
-    completed: false,
-  },
-  {
-    id: '3',
-    title: 'به‌روزرسانی وب‌سایت',
-    description: 'اضافه کردن محصولات جدید و به‌روزرسانی قیمت‌ها',
-    status: 'completed',
-    priority: 'low',
-    dueDate: '2025-07-15',
-    assignee: {
-      name: 'رضا کریمی',
-      avatar: null,
-      email: 'reza@example.com',
-    },
-    completed: true,
-  },
-];
-
-export default function TasksPage() {
-  const [tasks, setTasks] = useState(mockTasks);
-  const [showAddTask, setShowAddTask] = useState(false);
-  const [newTask, setNewTask] = useState({
+export default function CalendarPage() {
+  const [events, setEvents] = useState(mockCalendarEvents);
+  const [showAddEvent, setShowAddEvent] = useState(false);
+  const [newEvent, setNewEvent] = useState({
     title: '',
     description: '',
-    assigneeId: '',
-    priority: 'medium',
-    dueDate: '',
+    startDate: '',
+    endDate: '',
+    type: 'meeting',
+    customerId: '',
+    assignedTo: '',
+    location: ''
   });
 
-  const toggleTaskCompletion = (taskId: string) => {
-    setTasks(tasks.map(task =>
-      task.id === taskId ? { ...task, completed: !task.completed } : task
-    ));
-  };
-
-  const handleAddTask = () => {
-    const assignee = mockUsers.find(user => user.id === newTask.assigneeId);
-    const task = {
-      id: (tasks.length + 1).toString(),
-      ...newTask,
-      status: 'pending',
-      completed: false,
-      assignee: assignee || mockUsers[0],
+  const handleAddEvent = () => {
+    const event = {
+      id: (events.length + 1).toString(),
+      title: newEvent.title,
+      description: newEvent.description,
+      startDate: newEvent.startDate,
+      endDate: newEvent.endDate,
+      type: newEvent.type as 'meeting' | 'call' | 'task',
+      customerId: newEvent.customerId,
+      customerName: mockCustomers.find(c => c.id === newEvent.customerId)?.name || '',
+      assignedTo: newEvent.assignedTo,
+      status: 'scheduled' as 'scheduled' | 'completed' | 'cancelled',
+      location: newEvent.location
     };
-    setTasks([task, ...tasks]);
-    setShowAddTask(false);
-    setNewTask({
+
+    setEvents([event, ...events]);
+    setShowAddEvent(false);
+    setNewEvent({
       title: '',
       description: '',
-      assigneeId: '',
-      priority: 'medium',
-      dueDate: '',
+      startDate: '',
+      endDate: '',
+      type: 'meeting',
+      customerId: '',
+      assignedTo: '',
+      location: ''
     });
   };
 
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'high': return 'text-red-500 bg-red-50 dark:bg-red-950';
-      case 'medium': return 'text-yellow-500 bg-yellow-50 dark:bg-yellow-950';
-      case 'low': return 'text-green-500 bg-green-50 dark:bg-green-950';
-      default: return 'text-gray-500 bg-gray-50 dark:bg-gray-950';
+  const getEventTypeIcon = (type: string) => {
+    switch (type) {
+      case 'meeting': return <Users className="h-4 w-4" />;
+      case 'call': return <Video className="h-4 w-4" />;
+      default: return <CalendarIcon className="h-4 w-4" />;
     }
   };
 
-  const getPriorityLabel = (priority: string) => {
-    switch (priority) {
-      case 'high': return 'ضروری';
-      case 'medium': return 'متوسط';
-      case 'low': return 'عادی';
-      default: return priority;
+  const getEventTypeColor = (type: string) => {
+    switch (type) {
+      case 'meeting': return 'bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-200';
+      case 'call': return 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-200';
+      default: return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200';
     }
+  };
+
+  const getEventTypeLabel = (type: string) => {
+    switch (type) {
+      case 'meeting': return 'جلسه';
+      case 'call': return 'تماس';
+      default: return 'رویداد';
+    }
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'scheduled': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-200';
+      case 'completed': return 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-200';
+      case 'cancelled': return 'bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-200';
+      default: return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200';
+    }
+  };
+
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case 'scheduled': return 'برنامه‌ریزی شده';
+      case 'completed': return 'تکمیل شده';
+      case 'cancelled': return 'لغو شده';
+      default: return status;
+    }
+  };
+
+  const getUserName = (userId: string) => {
+    const user = mockUsers.find(u => u.id === userId);
+    return user ? user.name : 'نامشخص';
   };
 
   return (
     <div className="space-y-6 animate-fade-in-up">
-      {/* هدر */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold font-vazir bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
-            مدیریت وظایف
+            تقویم رویدادها
           </h1>
-          <p className="text-muted-foreground font-vazir mt-2">مدیریت و پیگیری وظایف تیم</p>
+          <p className="text-muted-foreground font-vazir mt-2">
+            مدیریت جلسات، تماس‌ها و رویدادهای شما
+          </p>
         </div>
-        <Dialog open={showAddTask} onOpenChange={setShowAddTask}>
+
+        <Dialog open={showAddEvent} onOpenChange={setShowAddEvent}>
           <DialogTrigger asChild>
-            <Button
-              className="bg-gradient-to-r from-primary via-secondary to-accent hover:from-primary/90 hover:via-secondary/90 hover:to-accent/90 font-vazir"
-            >
+            <Button className="font-vazir">
               <Plus className="h-4 w-4 ml-2" />
-              وظیفه جدید
+              رویداد جدید
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px]">
+          <DialogContent className="max-w-2xl">
             <DialogHeader>
-              <DialogTitle className="font-vazir text-lg">ایجاد وظیفه جدید</DialogTitle>
-              <DialogDescription className="font-vazir text-sm text-muted-foreground">
-                مشخصات وظیفه جدید را وارد کنید
+              <DialogTitle className="font-vazir">ایجاد رویداد جدید</DialogTitle>
+              <DialogDescription className="font-vazir">
+                اطلاعات رویداد را وارد کنید
               </DialogDescription>
             </DialogHeader>
-            <div className="space-y-4 mt-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium font-vazir">عنوان وظیفه</label>
-                <Input
-                  placeholder="عنوان وظیفه را وارد کنید"
-                  value={newTask.title}
-                  onChange={(e) => setNewTask({ ...newTask, title: e.target.value })}
-                  className="font-vazir"
-                />
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium font-vazir">عنوان</label>
+                  <Input
+                    placeholder="عنوان رویداد"
+                    value={newEvent.title}
+                    onChange={(e) => setNewEvent({ ...newEvent, title: e.target.value })}
+                    className="font-vazir"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium font-vazir">نوع</label>
+                  <Select
+                    value={newEvent.type}
+                    onValueChange={(value) => setNewEvent({ ...newEvent, type: value })}
+                  >
+                    <SelectTrigger className="font-vazir">
+                      <SelectValue placeholder="نوع رویداد" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="meeting" className="font-vazir">جلسه</SelectItem>
+                      <SelectItem value="call" className="font-vazir">تماس</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
 
               <div className="space-y-2">
                 <label className="text-sm font-medium font-vazir">توضیحات</label>
                 <Textarea
-                  placeholder="توضیحات وظیفه را وارد کنید"
-                  value={newTask.description}
-                  onChange={(e) => setNewTask({ ...newTask, description: e.target.value })}
+                  placeholder="توضیحات رویداد"
+                  value={newEvent.description}
+                  onChange={(e) => setNewEvent({ ...newEvent, description: e.target.value })}
                   className="font-vazir"
-                  rows={3}
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium font-vazir">اولویت</label>
-                  <Select
-                    value={newTask.priority}
-                    onValueChange={(value) => setNewTask({ ...newTask, priority: value })}
-                  >
-                    <SelectTrigger className="font-vazir">
-                      <SelectValue placeholder="انتخاب اولویت" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="high" className="font-vazir">ضروری</SelectItem>
-                      <SelectItem value="medium" className="font-vazir">متوسط</SelectItem>
-                      <SelectItem value="low" className="font-vazir">عادی</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-sm font-medium font-vazir">تاریخ سررسید</label>
+                  <label className="text-sm font-medium font-vazir">تاریخ شروع</label>
                   <Input
-                    type="date"
-                    value={newTask.dueDate}
-                    onChange={(e) => setNewTask({ ...newTask, dueDate: e.target.value })}
+                    type="datetime-local"
+                    value={newEvent.startDate}
+                    onChange={(e) => setNewEvent({ ...newEvent, startDate: e.target.value })}
                     className="font-vazir"
-                    min={new Date().toISOString().split('T')[0]}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium font-vazir">تاریخ پایان</label>
+                  <Input
+                    type="datetime-local"
+                    value={newEvent.endDate}
+                    onChange={(e) => setNewEvent({ ...newEvent, endDate: e.target.value })}
+                    className="font-vazir"
                   />
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <label className="text-sm font-medium font-vazir">محول به</label>
-                <Select
-                  value={newTask.assigneeId}
-                  onValueChange={(value) => setNewTask({ ...newTask, assigneeId: value })}
-                >
-                  <SelectTrigger className="font-vazir">
-                    <SelectValue placeholder="انتخاب همکار" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {mockUsers.map(user => (
-                      <SelectItem key={user.id} value={user.id} className="font-vazir">
-                        <div className="flex items-center space-x-2 space-x-reverse">
-                          <Avatar className="h-6 w-6">
-                            <AvatarFallback className="font-vazir bg-primary/10 text-primary text-xs">
-                              {user.name.split(' ').map(n => n[0]).join('')}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div className="flex flex-col">
-                            <span className="text-sm">{user.name}</span>
-                            <span className="text-xs text-muted-foreground">{user.role}</span>
-                          </div>
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium font-vazir">مشتری</label>
+                  <Select
+                    value={newEvent.customerId}
+                    onValueChange={(value) => setNewEvent({ ...newEvent, customerId: value })}
+                  >
+                    <SelectTrigger className="font-vazir">
+                      <SelectValue placeholder="انتخاب مشتری" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {mockCustomers.map(customer => (
+                        <SelectItem key={customer.id} value={customer.id} className="font-vazir">
+                          {customer.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium font-vazir">مسئول</label>
+                  <Select
+                    value={newEvent.assignedTo}
+                    onValueChange={(value) => setNewEvent({ ...newEvent, assignedTo: value })}
+                  >
+                    <SelectTrigger className="font-vazir">
+                      <SelectValue placeholder="انتخاب مسئول" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {mockUsers.map(user => (
+                        <SelectItem key={user.id} value={user.id} className="font-vazir">
+                          {user.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
 
-              <div className="flex justify-end space-x-2 space-x-reverse mt-6">
+              <div className="space-y-2">
+                <label className="text-sm font-medium font-vazir">مکان</label>
+                <Input
+                  placeholder="مکان برگزاری"
+                  value={newEvent.location}
+                  onChange={(e) => setNewEvent({ ...newEvent, location: e.target.value })}
+                  className="font-vazir"
+                />
+              </div>
+
+              <div className="flex justify-end space-x-2 space-x-reverse">
                 <Button
                   variant="outline"
-                  onClick={() => setShowAddTask(false)}
+                  onClick={() => setShowAddEvent(false)}
                   className="font-vazir"
                 >
                   انصراف
                 </Button>
                 <Button
-                  onClick={handleAddTask}
-                  disabled={!newTask.title || !newTask.assigneeId || !newTask.dueDate}
+                  onClick={handleAddEvent}
+                  disabled={!newEvent.title || !newEvent.startDate || !newEvent.endDate}
                   className="font-vazir bg-primary text-primary-foreground hover:bg-primary/90"
                 >
-                  ایجاد وظیفه
+                  ایجاد رویداد
                 </Button>
               </div>
             </div>
@@ -295,122 +277,105 @@ export default function TasksPage() {
         </Dialog>
       </div>
 
-      {/* آمار سریع */}
-      <div className="grid gap-4 md:grid-cols-4">
-        <Card className="border-primary/20 hover:border-primary/40 transition-all duration-300">
+      {/* Stats Cards */}
+      <div className="grid gap-4 md:grid-cols-3">
+        <Card className="border-border/50 hover:border-primary/30 transition-all duration-300">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium font-vazir">کل وظایف</CardTitle>
-            <CheckCircle2 className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium font-vazir">
+              رویدادهای امروز
+            </CardTitle>
+            <CalendarIcon className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold font-vazir">{tasks.length.toLocaleString('fa-IR')}</div>
-          </CardContent>
-        </Card>
-
-        <Card className="border-yellow-200 hover:border-yellow-400 transition-all duration-300">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium font-vazir">در حال انجام</CardTitle>
-            <Clock className="h-4 w-4 text-yellow-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-yellow-600 font-vazir">
-              {tasks.filter(t => !t.completed && t.status === 'in_progress').length.toLocaleString('fa-IR')}
+            <div className="text-2xl font-bold font-vazir">
+              {events.filter(event => {
+                const today = new Date().toDateString();
+                return new Date(event.startDate).toDateString() === today;
+              }).length}
             </div>
           </CardContent>
         </Card>
-
-        <Card className="border-red-200 hover:border-red-400 transition-all duration-300">
+        <Card className="border-border/50 hover:border-secondary/30 transition-all duration-300">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium font-vazir">ضروری</CardTitle>
-            <AlertCircle className="h-4 w-4 text-red-500" />
+            <CardTitle className="text-sm font-medium font-vazir">
+              جلسات این هفته
+            </CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-red-600 font-vazir">
-              {tasks.filter(t => t.priority === 'high' && !t.completed).length.toLocaleString('fa-IR')}
+            <div className="text-2xl font-bold font-vazir">
+              {events.filter(event => event.type === 'meeting').length}
             </div>
           </CardContent>
         </Card>
-
-        <Card className="border-green-200 hover:border-green-400 transition-all duration-300">
+        <Card className="border-border/50 hover:border-accent/30 transition-all duration-300">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium font-vazir">تکمیل شده</CardTitle>
-            <CheckCircle2 className="h-4 w-4 text-green-500" />
+            <CardTitle className="text-sm font-medium font-vazir">
+              تماس‌های برنامه‌ریزی شده
+            </CardTitle>
+            <Video className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600 font-vazir">
-              {tasks.filter(t => t.completed).length.toLocaleString('fa-IR')}
+            <div className="text-2xl font-bold font-vazir">
+              {events.filter(event => event.type === 'call').length}
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* لیست وظایف */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center space-x-2 space-x-reverse font-vazir">
-              <CheckCircle2 className="h-5 w-5" />
-              <span>لیست وظایف</span>
-            </CardTitle>
-            <Button variant="outline" size="sm" className="font-vazir">
-              <Filter className="h-4 w-4 ml-2" />
-              فیلتر
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {tasks.map(task => (
-              <div
-                key={task.id}
-                className={`flex items-start space-x-4 space-x-reverse p-4 border rounded-lg transition-all duration-300 ${task.completed
-                  ? 'border-green-200 bg-green-50/50 dark:border-green-900 dark:bg-green-900/20'
-                  : 'border-border/50 hover:border-primary/30'
-                  }`}
-              >
-                <Checkbox
-                  checked={task.completed}
-                  onCheckedChange={() => toggleTaskCompletion(task.id)}
-                  className="mt-1"
-                />
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <h4 className={`font-medium font-vazir ${task.completed ? 'line-through text-muted-foreground' : ''}`}>
-                        {task.title}
-                      </h4>
-                      <p className={`text-sm text-muted-foreground font-vazir mt-1 ${task.completed ? 'line-through' : ''}`}>
-                        {task.description}
-                      </p>
+      {/* Events List */}
+      <div className="space-y-4">
+        {events.map((event) => (
+          <Card key={event.id} className="border-border/50 hover:border-primary/20 transition-all duration-300">
+            <CardContent className="p-6">
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <div className="flex items-center space-x-4 space-x-reverse mb-2">
+                    <div className="flex items-center space-x-2 space-x-reverse">
+                      {getEventTypeIcon(event.type)}
+                      <h3 className="text-lg font-semibold font-vazir">{event.title}</h3>
                     </div>
-                    <Badge variant="outline" className={`${getPriorityColor(task.priority)} font-vazir`}>
-                      {getPriorityLabel(task.priority)}
+                    <Badge variant="outline" className={`${getEventTypeColor(event.type)} font-vazir`}>
+                      {getEventTypeLabel(event.type)}
+                    </Badge>
+                    <Badge variant="outline" className={`${getStatusColor(event.status)} font-vazir`}>
+                      {getStatusLabel(event.status)}
                     </Badge>
                   </div>
-                  <div className="flex items-center space-x-4 space-x-reverse mt-4">
-                    <div className="flex items-center space-x-2 space-x-reverse">
+                  <p className="text-muted-foreground font-vazir mb-4">{event.description}</p>
+
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                    <div className="flex items-center space-x-2 space-x-reverse text-muted-foreground">
+                      <Clock className="h-4 w-4" />
+                      <span className="font-vazir">
+                        {new Date(event.startDate).toLocaleDateString('fa-IR')} - {new Date(event.startDate).toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' })}
+                      </span>
+                    </div>
+                    <div className="flex items-center space-x-2 space-x-reverse text-muted-foreground">
+                      <Users className="h-4 w-4" />
+                      <span className="font-vazir">{event.customerName}</span>
+                    </div>
+                    <div className="flex items-center space-x-2 space-x-reverse text-muted-foreground">
                       <Avatar className="h-6 w-6">
                         <AvatarFallback className="font-vazir bg-primary/10 text-primary text-xs">
-                          {task.assignee.name.split(' ').map(n => n[0]).join('')}
+                          {getUserName(event.assignedTo).split(' ').map((n: string) => n[0]).join('')}
                         </AvatarFallback>
                       </Avatar>
-                      <span className="text-sm text-muted-foreground font-vazir">
-                        {task.assignee.name}
-                      </span>
+                      <span className="font-vazir">{getUserName(event.assignedTo)}</span>
                     </div>
-                    <div className="flex items-center text-muted-foreground">
-                      <Calendar className="h-4 w-4 ml-1" />
-                      <span className="text-sm font-vazir">
-                        {new Date(task.dueDate).toLocaleDateString('fa-IR')}
-                      </span>
-                    </div>
+                    {event.location && (
+                      <div className="flex items-center space-x-2 space-x-reverse text-muted-foreground">
+                        <MapPin className="h-4 w-4" />
+                        <span className="font-vazir">{event.location}</span>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
     </div>
   );
 }

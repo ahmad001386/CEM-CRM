@@ -227,11 +227,17 @@ export interface Feedback {
   id: string;
   customerId: string;
   customerName: string;
-  type: 'csat' | 'nps' | 'ces';
+  type: 'csat' | 'nps' | 'ces' | 'complaint' | 'suggestion' | 'praise';
   score: number;
   comment?: string;
   createdAt: string;
   category: string;
+  title?: string;
+  product?: string;
+  channel?: 'email' | 'website' | 'phone' | 'chat';
+  priority?: 'low' | 'medium' | 'high';
+  status?: 'pending' | 'inProgress' | 'completed';
+  description?: string;
 }
 
 export interface DashboardStats {

@@ -1,31 +1,7 @@
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-
-const mockInsights = [
-    {
-        id: 1,
-        title: "افزایش شکایات در مورد سرعت پاسخگویی",
-        description: "در ماه گذشته، تعداد شکایات مربوط به زمان پاسخگویی 25% افزایش یافته است.",
-        impact: "high",
-        category: "Support",
-        status: "new",
-        source: "تحلیل بازخوردها",
-        date: "1402/04/15",
-        suggestion: "پیشنهاد می‌شود تیم پشتیبانی تقویت شود"
-    },
-    {
-        id: 2,
-        title: "رضایت بالا از ویژگی جدید",
-        description: "کاربران از قابلیت جدید گزارش‌گیری رضایت 85% داشته‌اند",
-        impact: "medium",
-        category: "Product",
-        status: "in_progress",
-        source: "نظرسنجی محصول",
-        date: "1402/04/10",
-        suggestion: "توسعه ویژگی‌های مشابه در سایر بخش‌ها"
-    },
-];
+import { mockInsightsData } from '@/lib/mock-data';
 
 const impactColors = {
     high: "text-red-500 bg-red-50",
@@ -54,7 +30,7 @@ export default function InsightsPage() {
 
             {/* Insights List */}
             <div className="space-y-4">
-                {mockInsights.map(insight => (
+                {mockInsightsData.map(insight => (
                     <Card key={insight.id} className="p-6">
                         <div className="flex items-start justify-between mb-4">
                             <div className="space-y-1">

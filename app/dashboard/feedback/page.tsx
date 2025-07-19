@@ -22,49 +22,7 @@ import {
     FileDown,
     Plus
 } from 'lucide-react';
-
-const mockFeedbacks = [
-    {
-        id: 1,
-        customerName: 'شرکت الف',
-        title: 'مشکل در پشتیبانی',
-        type: 'complaint',
-        product: 'محصول الف',
-        channel: 'email',
-        satisfaction: 2,
-        priority: 'high',
-        status: 'pending',
-        date: '1402/04/15',
-        description: 'زمان پاسخگویی تیم پشتیبانی بسیار طولانی است'
-    },
-    {
-        id: 2,
-        customerName: 'شرکت ب',
-        title: 'پیشنهاد برای بهبود محصول',
-        type: 'suggestion',
-        product: 'محصول ب',
-        channel: 'website',
-        satisfaction: 4,
-        priority: 'medium',
-        status: 'inProgress',
-        date: '1402/04/14',
-        description: 'اضافه کردن قابلیت جدید برای بهبود عملکرد'
-    },
-    {
-        id: 3,
-        customerName: 'شرکت ج',
-        title: 'تشکر از کیفیت محصول',
-        type: 'praise',
-        product: 'محصول ج',
-        channel: 'phone',
-        satisfaction: 5,
-        priority: 'low',
-        status: 'completed',
-        date: '1402/04/13',
-        description: 'کیفیت محصول عالی بود و با نیازهای ما کاملاً مطابقت داشت'
-    },
-    // ... می‌توانید موارد بیشتری اضافه کنید
-];
+import { mockFeedback } from '@/lib/mock-data';
 
 const statusMap = {
     pending: { label: 'در انتظار بررسی', color: 'bg-yellow-500' },
@@ -94,11 +52,11 @@ export default function FeedbackListPage() {
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 10;
 
-    const filteredFeedbacks = mockFeedbacks.filter(feedback => {
+    const filteredFeedbacks = mockFeedback.filter(feedback => {
         const matchesSearch =
             feedback.customerName.includes(searchTerm) ||
-            feedback.title.includes(searchTerm) ||
-            feedback.description.includes(searchTerm);
+            feedback.title?.includes(searchTerm) ||
+            feedback.description?.includes(searchTerm);
 
         const matchesStatus = selectedStatus === 'all' || feedback.status === selectedStatus;
         const matchesType = selectedType === 'all' || feedback.type === selectedType;
@@ -186,37 +144,42 @@ export default function FeedbackListPage() {
                         <div className="flex items-start justify-between">
                             <div className="flex-1">
                                 <div className="flex items-center gap-2 mb-2">
-                                    <h3 className="font-medium">{feedback.title}</h3>
-                                    <Badge variant="outline" className={typeMap[feedback.type].color}>
-                                        {typeMap[feedback.type].label}
+                                    <h3 className="font-medium">{feedback.title || 'بازخورد'}</h3>
+                                    <Badge variant="outline" className={typeMap[feedback.type]?.color || 'bg-gray-100 text-gray-800'}>
+                                        {typeMap[feedback.type]?.label || feedback.type}
                                     </Badge>
-                                    <div className={`w-2 h-2 rounded-full ${priorityMap[feedback.priority].color}`} />
+                                    {feedback.priority && (
+                                        <div className={`w-2 h-2 rounded-full ${priorityMap[feedback.priority]?.color || 'bg-gray-500'}`} />
+                                    )}
                                 </div>
                                 <p className="text-sm text-muted-foreground mb-2">
-                                    {feedback.customerName} - {feedback.product}
+                                    {feedback.customerName} {feedback.product && `- ${feedback.product}`}
                                 </p>
-                                <p className="text-sm">{feedback.description}</p>
+                                <p className="text-sm">{feedback.description || feedback.comment}</p>
                                 <div className="flex items-center gap-4 mt-4 text-sm text-muted-foreground">
-                                    <span>{feedback.date}</span>
-                                    <span>از طریق: {feedback.channel}</span>
+                                    <span>{feedback.createdAt}</span>
+                                    {feedback.channel && <span>از طریق: {feedback.channel}</span>}
                                     <div className="flex items-center">
-                                        <span>رضایت: </span>
+                                        <span>امتیاز: </span>
                                         <div className="flex items-center gap-0.5 mr-1">
                                             {Array.from({ length: 5 }).map((_, i) => (
                                                 <div
                                                     key={i}
-                                                    className={`w-2 h-2 rounded-full ${i < feedback.satisfaction ? 'bg-yellow-400' : 'bg-gray-200'
+                                                    className={`w-2 h-2 rounded-full ${i < feedback.score ? 'bg-yellow-400' : 'bg-gray-200'
                                                         }`}
                                                 />
                                             ))}
                                         </div>
+                                        <span className="mr-1">({feedback.score}/5)</span>
                                     </div>
                                 </div>
                             </div>
                             <div className="flex flex-col items-end gap-2">
-                                <Badge variant="outline" className={`${statusMap[feedback.status].color} bg-opacity-10`}>
-                                    {statusMap[feedback.status].label}
-                                </Badge>
+                                {feedback.status && (
+                                    <Badge variant="outline" className={`${statusMap[feedback.status]?.color || 'bg-gray-500'} bg-opacity-10`}>
+                                        {statusMap[feedback.status]?.label || feedback.status}
+                                    </Badge>
+                                )}
                                 <Button variant="ghost" size="sm" className="h-8 px-2">
                                     <MessageCircle className="h-4 w-4 ml-1" />
                                     پاسخ

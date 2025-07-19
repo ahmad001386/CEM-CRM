@@ -1,33 +1,7 @@
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-
-const mockVOCItems = [
-    {
-        id: 1,
-        type: "request",
-        title: "درخواست افزودن قابلیت اکسپورت گروهی",
-        description: "مشتریان نیاز به امکان اکسپورت دسته‌ای گزارش‌ها دارند",
-        status: "open",
-        priority: "high",
-        source: "بازخورد مستقیم",
-        department: "محصول",
-        date: "1402/04/15",
-        frequency: 12
-    },
-    {
-        id: 2,
-        type: "complaint",
-        title: "کندی سیستم در ساعات پیک",
-        description: "گزارش‌های متعدد از کندی سیستم در ساعات شلوغی",
-        status: "in_review",
-        priority: "high",
-        source: "تیکت پشتیبانی",
-        department: "فنی",
-        date: "1402/04/14",
-        frequency: 8
-    },
-];
+import { mockVoiceOfCustomerData } from '@/lib/mock-data';
 
 const statusColors = {
     open: "bg-green-50 text-green-600",
@@ -105,34 +79,33 @@ export default function VoiceOfCustomerPage() {
 
             {/* VOC Items List */}
             <div className="space-y-4">
-                {mockVOCItems.map(item => (
+                {mockVoiceOfCustomerData.recentFeedback.map(item => (
                     <Card key={item.id} className="p-6">
                         <div className="flex items-start justify-between mb-4">
                             <div className="space-y-1">
                                 <div className="flex items-center gap-2 mb-2">
-                                    <Badge className={typeColors[item.type]}>
-                                        {item.type === 'request' ? 'درخواست' :
-                                            item.type === 'complaint' ? 'شکایت' : 'پیشنهاد'}
+                                    <Badge className={item.sentiment === 'positive' ? 'bg-green-50 text-green-600' :
+                                        item.sentiment === 'negative' ? 'bg-red-50 text-red-600' :
+                                            'bg-yellow-50 text-yellow-600'}>
+                                        {item.sentiment === 'positive' ? 'مثبت' :
+                                            item.sentiment === 'negative' ? 'منفی' : 'خنثی'}
                                     </Badge>
-                                    <Badge className={priorityColors[item.priority]}>
-                                        {item.priority === 'high' ? 'اولویت بالا' :
-                                            item.priority === 'medium' ? 'اولویت متوسط' : 'اولویت پایین'}
-                                    </Badge>
-                                    <Badge className={statusColors[item.status]}>
-                                        {item.status === 'open' ? 'باز' :
-                                            item.status === 'in_review' ? 'در حال بررسی' : 'بسته شده'}
+                                    <Badge variant="outline">
+                                        {item.category}
                                     </Badge>
                                 </div>
-                                <h3 className="text-lg font-medium">{item.title}</h3>
-                                <p className="text-muted-foreground">{item.description}</p>
+                                <h3 className="text-lg font-medium">بازخورد از {item.customer}</h3>
+                                <p className="text-muted-foreground">{item.message}</p>
                             </div>
-                            <Button variant="outline">گزارش به {item.department}</Button>
+                            <div className="text-sm text-muted-foreground">
+                                {item.date}
+                            </div>
                         </div>
 
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                             <div>
-                                <span className="text-muted-foreground">منبع:</span>
-                                <span className="mr-2">{item.source}</span>
+                                <span className="text-muted-foreground">دسته‌بندی:</span>
+                                <span className="mr-2">{item.category}</span>
                             </div>
                             <div>
                                 <span className="text-muted-foreground">تاریخ:</span>
