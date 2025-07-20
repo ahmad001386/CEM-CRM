@@ -59,7 +59,7 @@ export async function middleware(request: NextRequest) {
 
       // Add user info to request headers
       const requestHeaders = new Headers(request.headers);
-      requestHeaders.set('x-user-id', decoded.userId);
+      requestHeaders.set('x-user-id', decoded.id);
       requestHeaders.set('x-user-role', decoded.role);
       requestHeaders.set('x-user-email', decoded.email);
 
