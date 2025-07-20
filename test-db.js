@@ -15,7 +15,7 @@ async function testDatabaseConnection() {
 
     // Test if users table exists
     const [tables] = await connection.execute(
-      "SELECT TABLE_NAME FROM information_schema.TABLES WHERE TABLE_SCHEMA = 'robin' AND TABLE_NAME = 'users'"
+      "SELECT TABLE_NAME FROM information_schema.TABLES WHERE TABLE_SCHEMA = 'crm_system' AND TABLE_NAME = 'users'"
     );
 
     if (tables.length > 0) {
