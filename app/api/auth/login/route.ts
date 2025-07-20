@@ -1,18 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { loginUser } from '@/lib/auth';
-import { testConnection } from '@/lib/database';
 
 export async function POST(req: NextRequest) {
   try {
-    // Test database connection first
-    const dbConnected = await testConnection();
-    if (!dbConnected) {
-      return NextResponse.json(
-        { success: false, message: 'خطا در اتصال به پایگاه داده' },
-        { status: 500 }
-      );
-    }
-
     const body = await req.json();
     const { email, password } = body;
 

@@ -6,28 +6,18 @@ import { v4 as uuidv4 } from 'uuid';
 // GET /api/users - Get all users (CEO only)
 export async function GET(req: NextRequest) {
   try {
-    // Get token from header
-    const token = req.headers.get('authorization')?.replace('Bearer ', '') || 
-                  req.headers.get('x-token');
+    const userRole = req.headers.get('x-user-role');
+    const currentUserId = req.headers.get('x-user-id');
 
-    if (!token) {
+    if (!currentUserId) {
       return NextResponse.json(
-        { success: false, message: 'توکن یافت نشد' },
-        { status: 401 }
-      );
-    }
-
-    // Verify token
-    const decoded = verifyToken(token);
-    if (!decoded) {
-      return NextResponse.json(
-        { success: false, message: 'توکن نامعتبر' },
+        { success: false, message: 'کاربر شناسایی نشد' },
         { status: 401 }
       );
     }
 
     // Check permission - only CEO can view all users
-    if (!hasPermission(decoded.role || '', ['ceo', 'مدیر'])) {
+    if (!hasPermission(userRole || '', ['ceo', 'مدیر'])) {
       return NextResponse.json(
         { success: false, message: 'عدم دسترسی' },
         { status: 403 }

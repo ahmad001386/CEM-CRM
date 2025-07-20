@@ -12,7 +12,7 @@ import { Label } from '@/components/ui/label';
 export default function LoginPage() {
     const router = useRouter();
     const [email, setEmail] = useState('ceo@company.com'); // Default CEO email for testing
-    const [password, setPassword] = useState(''); 
+    const [password, setPassword] = useState('admin123'); // Default password for testing
     const [error, setError] = useState('');
     const [isLoggingIn, setIsLoggingIn] = useState(false);
 
@@ -166,9 +166,13 @@ export default function LoginPage() {
                                     transition={{ delay: 0.9 }}
                                 >
                                     <p className="text-xs text-blue-700 font-vazir text-center">
-                                        💡 برای تست: ایمیل مدیر عامل از دیتابیس استفاده کنید
+                                        💡 برای تست: ایمیل و رمز عبور مدیر عامل
                                         <br />
                                         <span className="font-mono bg-blue-100 px-1 rounded">ceo@company.com</span>
+                                        <br />
+                                        <span className="font-mono bg-blue-100 px-1 rounded">admin123</span>
+                                        <br />
+                                        <span className="text-xs">یا کارشناس فروش: maryam@company.com / 123456</span>
                                     </p>
                                 </motion.div>
 

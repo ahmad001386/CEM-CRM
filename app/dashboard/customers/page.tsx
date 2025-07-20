@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { DataTable } from '@/components/ui/data-table';
 import { Badge } from '@/components/ui/badge';
@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Progress } from '@/components/ui/progress';
-import { mockCustomers } from '@/lib/mock-data';
+import { useToast } from '@/hooks/use-toast';
 import { Customer } from '@/lib/types';
 import { 
   Plus, 
@@ -31,14 +31,43 @@ import {
   Building,
   Tag,
   DollarSign,
+  RefreshCw,
 } from 'lucide-react';
 
 export default function CustomersPage() {
-  const [customers] = useState<Customer[]>(mockCustomers);
+  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [segmentFilter, setSegmentFilter] = useState('all');
   const [priorityFilter, setPriorityFilter] = useState('all');
+  const { toast } = useToast();
+
+  // Load customers on component mount
+  useEffect(() => {
+    loadCustomers();
+  }, []);
+
+  const loadCustomers = async () => {
+    try {
+      setLoading(true);
+      setError('');
+      const response = await fetch('/api/customers');
+      const data = await response.json();
+      
+      if (data.success) {
+        setCustomers(data.data || []);
+      } else {
+        setError(data.message || 'خطا در دریافت مشتریان');
+      }
+    } catch (error) {
+      console.error('Error loading customers:', error);
+      setError('خطا در اتصال به سرور');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const filteredCustomers = customers.filter(customer => {
     const matchesSearch = customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -236,8 +265,19 @@ export default function CustomersPage() {
   const activeCustomers = customers.filter(c => c.status === 'active').length;
   const followUpCustomers = customers.filter(c => c.status === 'follow_up').length;
   const enterpriseCustomers = customers.filter(c => c.segment === 'enterprise').length;
-  const avgSatisfaction = customers.reduce((sum, c) => sum + (c.satisfactionScore || 0), 0) / customers.length;
+  const avgSatisfaction = customers.length > 0 ? customers.reduce((sum, c) => sum + (c.satisfactionScore || 0), 0) / customers.length : 0;
   const totalPotentialValue = customers.reduce((sum, c) => sum + (c.potentialValue || 0), 0);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground font-vazir">در حال بارگذاری مشتریان...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 animate-fade-in-up">
@@ -250,6 +290,10 @@ export default function CustomersPage() {
           <p className="text-muted-foreground font-vazir mt-2">مدیریت کامل مشتریان و فرآیند فروش</p>
         </div>
         <div className="flex space-x-2 space-x-reverse">
+          <Button variant="outline" onClick={loadCustomers} disabled={loading} className="font-vazir">
+            <RefreshCw className={`h-4 w-4 ml-2 ${loading ? 'animate-spin' : ''}`} />
+            بروزرسانی
+          </Button>
           <Button variant="outline" className="font-vazir">
             <Download className="h-4 w-4 ml-2" />
             خروجی CSV
@@ -262,6 +306,21 @@ export default function CustomersPage() {
           </Link>
         </div>
       </div>
+
+      {/* Error Display */}
+      {error && (
+        <Card className="border-destructive/20 bg-destructive/5">
+          <CardContent className="pt-6">
+            <div className="flex items-center space-x-2 space-x-reverse text-destructive">
+              <AlertCircle className="h-5 w-5" />
+              <span className="font-vazir">{error}</span>
+              <Button variant="outline" size="sm" onClick={loadCustomers} className="mr-auto font-vazir">
+                تلاش مجدد
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* آمار کلی */}
       <div className="grid gap-4 md:grid-cols-6">
@@ -321,7 +380,9 @@ export default function CustomersPage() {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold font-vazir">{(totalPotentialValue / 1000000000).toFixed(1)}B تومان</div>
+            <div className="text-2xl font-bold font-vazir">
+              {totalPotentialValue > 0 ? `${(totalPotentialValue / 1000000000).toFixed(1)}B تومان` : '۰ تومان'}
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -460,12 +521,25 @@ export default function CustomersPage() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <DataTable
-            data={filteredCustomers}
-            columns={columns}
-            onEdit={handleEditCustomer}
-            onDelete={handleDeleteCustomer}
-          />
+          {customers.length === 0 ? (
+            <div className="text-center py-8">
+              <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <p className="text-muted-foreground font-vazir">مشتری‌ای یافت نشد</p>
+              <Link href="/dashboard/customers/new">
+                <Button className="mt-4 font-vazir">
+                  <Plus className="h-4 w-4 ml-2" />
+                  افزودن اولین مشتری
+                </Button>
+              </Link>
+            </div>
+          ) : (
+            <DataTable
+              data={filteredCustomers}
+              columns={columns}
+              onEdit={handleEditCustomer}
+              onDelete={handleDeleteCustomer}
+            />
+          )}
         </CardContent>
       </Card>
     </div>

@@ -29,7 +29,7 @@ export async function GET(
         p.id as permission_id,
         p.name as permission_name,
         p.display_name as permission_display_name,
-        ump.granted,
+        COALESCE(ump.granted, FALSE) as granted,
         ump.created_at
       FROM modules m
       CROSS JOIN permissions p
@@ -60,7 +60,7 @@ export async function GET(
         permission_id: row.permission_id,
         permission_name: row.permission_name,
         permission_display_name: row.permission_display_name,
-        granted: row.granted || false
+        granted: Boolean(row.granted)
       });
     });
 

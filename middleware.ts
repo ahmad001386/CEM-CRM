@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { verifyToken } from './lib/auth';
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
 
   // Skip middleware for these paths
@@ -10,33 +11,68 @@ export function middleware(request: NextRequest) {
     pathname.startsWith('/api/auth') ||
     pathname.startsWith('/public') ||
     pathname === '/login' ||
-    pathname === '/favicon.ico'
+    pathname === '/favicon.ico' ||
+    pathname === '/'
   ) {
     return NextResponse.next();
   }
 
-  // For API routes (except auth), just pass through with headers
-  if (pathname.startsWith('/api')) {
-    const token = request.headers.get('authorization')?.replace('Bearer ', '');
+  // For dashboard routes, check authentication
+  if (pathname.startsWith('/dashboard')) {
+    const token = request.cookies.get('auth-token')?.value;
     
-    if (token) {
-      // Add headers for API to handle token verification
+    if (!token) {
+      return NextResponse.redirect(new URL('/login', request.url));
+    }
+
+    // Verify token
+    try {
+      const decoded = verifyToken(token);
+      if (!decoded) {
+        return NextResponse.redirect(new URL('/login', request.url));
+      }
+    } catch (error) {
+      return NextResponse.redirect(new URL('/login', request.url));
+    }
+  }
+
+  // For API routes (except auth), verify token and add user info to headers
+  if (pathname.startsWith('/api') && !pathname.startsWith('/api/auth')) {
+    const token = request.headers.get('authorization')?.replace('Bearer ', '') ||
+                  request.cookies.get('auth-token')?.value;
+
+    if (!token) {
+      return NextResponse.json(
+        { success: false, message: 'غیر مجاز - لطفاً وارد شوید' },
+        { status: 401 }
+      );
+    }
+
+    try {
+      const decoded = verifyToken(token);
+      if (!decoded) {
+        return NextResponse.json(
+          { success: false, message: 'توکن نامعتبر' },
+          { status: 401 }
+        );
+      }
+
+      // Add user info to request headers
       const requestHeaders = new Headers(request.headers);
-      requestHeaders.set('x-token', token);
-      
+      requestHeaders.set('x-user-id', decoded.userId);
+      requestHeaders.set('x-user-role', decoded.role);
+      requestHeaders.set('x-user-email', decoded.email);
+
       return NextResponse.next({
         request: {
           headers: requestHeaders,
         },
       });
-    }
-  }
-
-  // For dashboard routes
-  if (pathname.startsWith('/dashboard')) {
-    const token = request.cookies.get('auth-token')?.value;
-    if (!token) {
-      return NextResponse.redirect(new URL('/login', request.url));
+    } catch (error) {
+      return NextResponse.json(
+        { success: false, message: 'خطا در تأیید هویت' },
+        { status: 401 }
+      );
     }
   }
 
