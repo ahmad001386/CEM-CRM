@@ -46,7 +46,7 @@ export async function middleware(request: NextRequest) {
 
     // Verify token
     try {
-      const decoded = verifyToken(token);
+      const decoded = decodeJWT(token);
       if (!decoded) {
         return NextResponse.redirect(new URL('/login', request.url));
       }
