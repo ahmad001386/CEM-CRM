@@ -8,13 +8,11 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { mockUsers } from '@/lib/mock-data';
-
 
 export default function LoginPage() {
     const router = useRouter();
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
+    const [email, setEmail] = useState('ceo@company.com'); // Default CEO email for testing
+    const [password, setPassword] = useState(''); 
     const [error, setError] = useState('');
     const [isLoggingIn, setIsLoggingIn] = useState(false);
 
@@ -23,17 +21,34 @@ export default function LoginPage() {
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoggingIn(true);
+        setError('');
 
-        const user = mockUsers.find(u => u.email === email && u.password === password);
+        try {
+            const response = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email, password }),
+            });
 
-        if (user) {
-            localStorage.setItem('currentUser', JSON.stringify(user));
-            // کمی تاخیر برای نمایش انیمیشن
-            await new Promise(resolve => setTimeout(resolve, 600));
-            router.push('/dashboard');
-        } else {
+            const data = await response.json();
+
+            if (data.success) {
+                // Store user data in localStorage
+                localStorage.setItem('currentUser', JSON.stringify(data.user));
+                // Cookie is already set by the API
+                // Add some delay for animation
+                await new Promise(resolve => setTimeout(resolve, 600));
+                router.push('/dashboard');
+            } else {
+                setError(data.message || 'خطا در ورود');
+            }
+        } catch (error) {
+            console.error('Login error:', error);
+            setError('خطا در اتصال به سرور');
+        } finally {
             setIsLoggingIn(false);
-            setError('ایمیل یا رمز عبور اشتباه است');
         }
     };
 
@@ -142,6 +157,21 @@ export default function LoginPage() {
                                         {error}
                                     </motion.p>
                                 )}
+                                
+                                {/* Development hint */}
+                                <motion.div
+                                    className="bg-blue-50 border border-blue-200 rounded-lg p-3"
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    transition={{ delay: 0.9 }}
+                                >
+                                    <p className="text-xs text-blue-700 font-vazir text-center">
+                                        💡 برای تست: ایمیل مدیر عامل از دیتابیس استفاده کنید
+                                        <br />
+                                        <span className="font-mono bg-blue-100 px-1 rounded">ceo@company.com</span>
+                                    </p>
+                                </motion.div>
+
                                 <motion.div
                                     whileHover={{ scale: 1.02 }}
                                     whileTap={{ scale: 0.98 }}
