@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { verifyToken } from './lib/auth';
-import { ROUTE_MODULE_MAP, checkUserPermission } from './lib/permissions';
 
 export async function middleware(request: NextRequest) {
   // Get the pathname
@@ -49,31 +48,6 @@ export async function middleware(request: NextRequest) {
       const requestHeaders = new Headers(request.headers);
       requestHeaders.set('x-user-id', decoded.userId);
       requestHeaders.set('x-user-role', decoded.role);
-
-      // Check permissions for dashboard routes (not API)
-      if (pathname.startsWith('/dashboard') && pathname !== '/dashboard') {
-        const moduleNeeded = ROUTE_MODULE_MAP[pathname];
-        
-        if (moduleNeeded) {
-          // Skip permission check for CEO
-          if (decoded.role !== 'ceo' && decoded.role !== 'مدیر') {
-            const hasPermission = await checkUserPermission(
-              decoded.userId,
-              decoded.role,
-              moduleNeeded,
-              'view'
-            );
-
-            if (!hasPermission) {
-              // Redirect to dashboard with access denied message
-              const dashboardUrl = new URL('/dashboard', request.url);
-              dashboardUrl.searchParams.set('error', 'access_denied');
-              dashboardUrl.searchParams.set('module', moduleNeeded);
-              return NextResponse.redirect(dashboardUrl);
-            }
-          }
-        }
-      }
 
       return NextResponse.next({
         request: {
