@@ -68,7 +68,7 @@ export async function middleware(request: NextRequest) {
     }
 
     try {
-      const decoded = verifyToken(token);
+      const decoded = decodeJWT(token);
       if (!decoded) {
         return NextResponse.json(
           { success: false, message: 'توکن نامعتبر' },
