@@ -16,9 +16,8 @@ const dbConfig = {
 export const pool = mysql.createPool({
   ...dbConfig,
   waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0,
-  reconnect: true,
+  connectionLimit: 5,
+  queueLimit: 0
 });
 
 // Test database connection
