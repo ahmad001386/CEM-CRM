@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { executeQuery, executeSingle } from '@/lib/database';
-import { hashPassword, hasPermission } from '@/lib/auth';
+import { hashPassword, hasPermission, verifyToken } from '@/lib/auth';
 import { v4 as uuidv4 } from 'uuid';
 
 // GET /api/users - Get all users (CEO only)
