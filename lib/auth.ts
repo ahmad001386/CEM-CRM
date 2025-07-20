@@ -57,31 +57,48 @@ export function verifyToken(token: string): any {
 // Login function
 export async function loginUser(email: string, password: string): Promise<AuthResponse> {
   try {
-    // Get user from database
+    // Get user from database - removed status filter for debugging
     const users = await executeQuery<any>(
-      'SELECT * FROM users WHERE email = ? AND status = "active"',
+      'SELECT * FROM users WHERE email = ?',
       [email]
     );
+
+    console.log('🔍 User search result:', users.length > 0 ? 'User found' : 'User not found');
+    console.log('📧 Email searched:', email);
 
     if (users.length === 0) {
       return {
         success: false,
-        message: 'کاربر یافت نشد یا غیرفعال است'
+        message: 'کاربری با این ایمیل یافت نشد'
       };
     }
 
     const user = users[0];
+    console.log('👤 User found:', { id: user.id, email: user.email, status: user.status, role: user.role });
+
+    // Check if user is active
+    if (user.status !== 'active') {
+      return {
+        success: false,
+        message: 'حساب کاربری غیرفعال است'
+      };
+    }
 
     // Check password - for development, check both hashed and plain text
     let passwordValid = false;
     
+    console.log('🔑 Password check - Input:', password);
+    console.log('🔑 Password in DB:', user.password);
+    
     if (user.password_hash) {
       passwordValid = await verifyPassword(password, user.password_hash);
+      console.log('🔍 Hash password check:', passwordValid);
     }
     
     // For development - also check plain text password
     if (!passwordValid && user.password) {
       passwordValid = password === user.password;
+      console.log('🔍 Plain password check:', passwordValid);
     }
 
     if (!passwordValid) {
@@ -112,6 +129,8 @@ export async function loginUser(email: string, password: string): Promise<AuthRe
     // Generate token
     const token = generateToken(userData);
 
+    console.log('✅ Login successful for:', user.email);
+
     return {
       success: true,
       user: userData,
@@ -119,7 +138,7 @@ export async function loginUser(email: string, password: string): Promise<AuthRe
       message: 'ورود موفق'
     };
   } catch (error) {
-    console.error('Login error:', error);
+    console.error('❌ Login error:', error);
     return {
       success: false,
       message: 'خطا در سیستم'
