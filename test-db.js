@@ -8,7 +8,7 @@ async function testDatabaseConnection() {
       host: 'localhost',
       user: 'root',
       password: '1234',
-      database: 'robin',
+      database: 'crm_system',
     });
 
     console.log('✅ اتصال به دیتابیس موفق بود!');
