@@ -53,7 +53,7 @@ async function testDatabaseConnection() {
     console.error('❌ خطا در اتصال دیتابیس:', error.message);
     
     if (error.code === 'ER_BAD_DB_ERROR') {
-      console.log('💡 دیتابیس "robin" وجود ندارد. آیا می‌خواهید آن را ایجاد کنید؟');
+      console.log('💡 دیتابیس "crm_system" وجود ندارد. آیا می‌خواهید آن را ایجاد کنید؟');
     } else if (error.code === 'ER_ACCESS_DENIED_ERROR') {
       console.log('💡 دسترسی رد شد. لطفاً username/password را بررسی کنید');
     } else if (error.code === 'ECONNREFUSED') {
